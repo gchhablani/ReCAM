@@ -11,7 +11,7 @@ Our repository for the code, literature review, and results on SemEval-2021 Task
 	- Common-sense Reasoning
 	- Transformers-Based Model for Cloze-Style Question Answering
 	- Incorporating The Imperceptibility Rating from the Concreteness Rating Dataset
-		- The dataset is present ```data/Imperceptibility/Concreteness Ratings```.
+		- The dataset is present in ```data/Imperceptibility/Concreteness Ratings```.
 
 ### Non-Specificity
 
