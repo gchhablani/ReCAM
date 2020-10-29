@@ -41,16 +41,16 @@ def augment(sent):
         words = findsubsets(lst_of_words, n)
         new_sent = "".join(sent)
         for word in words:
-            for i in range(len(hypernyms_dict[word])):
-                new_phrase = (
-                    str(hypernyms_dict[word][i])
-                    .split("(")[1]
-                    .replace(")", "")
-                    .replace("'", "")
-                    .split(".")[0]
-                    .replace("_", " ")
-                )
-                new_sent = new_sent.replace(word, new_phrase)
+            i = random.randint(0,len(hypernyms_dict[word])-1)
+            new_phrase = (
+                str(hypernyms_dict[word][i])
+                .split("(")[1]
+                .replace(")", "")
+                .replace("'", "")
+                .split(".")[0]
+                .replace("_", " ")
+            )
+            new_sent = new_sent.replace(word, new_phrase)
         augmented_sentences.append(new_sent)
 
     return augmented_sentences
