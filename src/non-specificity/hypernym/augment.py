@@ -23,10 +23,13 @@ def hypernyms(sent):
     for w in pos_text:
         if w[1] == "NN":
             # apply LESK algorithm to get the correct word sense (WSD)
+            # print(w[0])
             answer = simple_lesk(sent, w[0], pos="n")
 
             if answer:
+                # print(answer)
                 hyp = answer.hypernyms()
+                # print(hyp)
                 lst_of_words.append(w[0])
                 hypernyms[w[0]] = hyp
 
@@ -35,22 +38,35 @@ def hypernyms(sent):
 
 def augment(sent):
     hypernyms_dict, lst_of_words = hypernyms(sent)
+    # print(lst_of_words)
+    # cartesian product of lst_of_words elements with their hypernyms
+
     augmented_sentences = []
 
     for n in range(1, len(lst_of_words) + 1):
-        words = findsubsets(lst_of_words, n)
-        new_sent = "".join(sent)
-        for word in words:
-            i = random.randint(0,len(hypernyms_dict[word])-1)
-            new_phrase = (
-                str(hypernyms_dict[word][i])
-                .split("(")[1]
-                .replace(")", "")
-                .replace("'", "")
-                .split(".")[0]
-                .replace("_", " ")
-            )
-            new_sent = new_sent.replace(word, new_phrase)
-        augmented_sentences.append(new_sent)
+        subsets = findsubsets(lst_of_words, n)
+        # print(subsets)
+
+        for subset in subsets:
+            new_sent = "".join(sent)
+            # print(subset)
+            # print(hypernyms_dict[word])
+            # precompute number of sentences generated
+
+            for word in subset:
+                i = random.randint(0, len(hypernyms_dict[word]) - 1)
+
+                new_phrase = (
+                    str(hypernyms_dict[word][i])
+                    .split("(")[1]
+                    .replace(")", "")
+                    .replace("'", "")
+                    .split(".")[0]
+                    .replace("_", " ")
+                )
+
+                new_sent = new_sent.replace(word, new_phrase)
+
+            augmented_sentences.append(new_sent)
 
     return augmented_sentences
