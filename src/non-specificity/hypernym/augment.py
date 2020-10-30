@@ -33,7 +33,10 @@ def hypernyms(sent):
                 lst_of_words.append(w[0])
                 hypernyms[w[0]] = hyp
 
-    return hypernyms, lst_of_words
+    if(len(lst_of_words)<=10):
+        return hypernyms, lst_of_words
+    else:
+        return hypernyms, random.choices(lst_of_words, k=10)
 
 
 def augment(sent):
