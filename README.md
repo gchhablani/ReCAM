@@ -6,7 +6,7 @@ Our repository for the code, literature review, and results on SemEval-2021 Task
 
 ### Imperceptibility
 
-- Approach 1:
+- Approaches:
 	- Plain GAReader (Baseline)
 	- Common-sense Reasoning
 	- Transformers-Based Model for Cloze-Style Question Answering
@@ -15,7 +15,7 @@ Our repository for the code, literature review, and results on SemEval-2021 Task
 
 ### Non-Specificity
 
-- Approach 1: 
+- Approaches: 
 	- Use WordNet's hypernyms, augment the dataset (replace nouns with their hypernyms), pretrain BERT on this augmented dataset.
 		- Code:
 
