@@ -11,7 +11,7 @@ def findsubsets(s, n):
     return list(itertools.combinations(s, n))
 
 
-def hypernyms(sent):
+def hypernyms(sent, k):
 
     # find all nouns in text (POS Tagging)
     text = nltk.word_tokenize(sent)
@@ -33,14 +33,14 @@ def hypernyms(sent):
                 lst_of_words.append(w[0])
                 hypernyms[w[0]] = hyp
 
-    if(len(lst_of_words)<=10):
+    if len(lst_of_words) <= k:
         return hypernyms, lst_of_words
     else:
-        return hypernyms, random.choices(lst_of_words, k=10)
+        return hypernyms, random.choices(lst_of_words, k=k)
 
 
-def augment(sent):
-    hypernyms_dict, lst_of_words = hypernyms(sent)
+def augment(sent, k):
+    hypernyms_dict, lst_of_words = hypernyms(sent, k)
     # print(lst_of_words)
     # cartesian product of lst_of_words elements with their hypernyms
 
@@ -57,18 +57,22 @@ def augment(sent):
             # precompute number of sentences generated
 
             for word in subset:
-                i = random.randint(0, len(hypernyms_dict[word]) - 1)
+                # print(hypernyms_dict[word])
+                try:
+                    i = random.randint(0, len(hypernyms_dict[word]) - 1)
 
-                new_phrase = (
-                    str(hypernyms_dict[word][i])
-                    .split("(")[1]
-                    .replace(")", "")
-                    .replace("'", "")
-                    .split(".")[0]
-                    .replace("_", " ")
-                )
+                    new_phrase = (
+                        str(hypernyms_dict[word][i])
+                        .split("(")[1]
+                        .replace(")", "")
+                        .replace("'", "")
+                        .split(".")[0]
+                        .replace("_", " ")
+                    )
 
-                new_sent = new_sent.replace(word, new_phrase)
+                    new_sent = new_sent.replace(word, new_phrase)
+                except:
+                    continue
 
             augmented_sentences.append(new_sent)
 
