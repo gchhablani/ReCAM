@@ -27,3 +27,4 @@ class ConcretenessDataset(Dataset):
             return word, rating
         except:
             print("UNK Word in Word2Vec Model")
+            return torch.zeros(300),0

@@ -6,7 +6,7 @@ import torch
 class TwoLayerNN(torch.nn.Module):
     def __init__(self, D_in=300, H1=128, H2=64, D_out=1):
 
-        super(TwoLayerNet, self).__init__()
+        super(TwoLayerNN, self).__init__()
         self.linear1 = torch.nn.Linear(D_in, H1)
         self.linear2 = torch.nn.Linear(H1, H2)
         self.linear3 = torch.nn.Linear(H2, D_out)
