@@ -1,4 +1,4 @@
-#Steps to run project:
+# Steps to run project:
 1) Create a folder CLOZE, with train and valid as sub-folders
 2) Create a sub-folder "high" in both, train and valid folders
 3) Run : !python bert_cloze_data_script.py --data_path path_to_train_jsonl_data --output_path ./CLOZE/train/high
