@@ -25,6 +25,7 @@ Our repository for the code, literature review, and results on SemEval-2021 Task
 			pip install -U pywsd
 			```
 			and use the ```augment(sent)``` function in ```src/non-specificity/hypernym/augment.py```.
+	- [Code for Finetuning BERT on the Augmented Dataset](https://colab.research.google.com/drive/1yzoCLV8gZKbh-bvXQz_kIwRLmjSCEXHJ?usp=sharing)
 
 ## To-Do                
 - [x] Exploratory Data Analysis
@@ -222,4 +223,4 @@ We can also use torch/nltk tokenizers to get tokens and check their lengths.
 - [Concreteness Ratings for 40 Thousand Generally Known English Word Lemmas](https://www.researchgate.net/publication/258061778_Concreteness_ratings_for_40_thousand_generally_known_English_word_lemmas)
 
 #### Non-Specificity
-- [WorNet Interface (Hypernyms)](https://www.nltk.org/howto/wordnet.html)
+- [WordNet Interface (Hypernyms)](https://www.nltk.org/howto/wordnet.html)
