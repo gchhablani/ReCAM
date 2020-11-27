@@ -7,8 +7,7 @@ class Linear(nn.Module):
     def __init__(self, in_features, out_features):
         super(Linear, self).__init__()
 
-        self.linear = nn.Linear(in_features=in_features,
-                                out_features=out_features)
+        self.linear = nn.Linear(in_features=in_features, out_features=out_features)
         self.init_params()
 
     def init_params(self):
