@@ -1,0 +1,9 @@
+# bert_finetune.yaml file
+
+input_data_file: '../../../data/non-specificity/aug/aug_data.txt'
+model_name: 'bert-large-uncased'
+save_model_directory: 'BERT_aug'
+num_train_epochs: 10
+batch_size: 16
+save_steps: 10000
+mlm_probability: 0.15
