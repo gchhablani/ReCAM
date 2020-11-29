@@ -150,7 +150,7 @@ def main():
     optimizer = AdamW(optimizer_grouped_parameters, lr=lr)
     """
 
-    for epoch in range(0, epochs + 1):
+    for epoch in range(1, epochs + 1):
         print("Epoch: {}".format(epoch))
         tr_loss = 0
         val_loss = 0

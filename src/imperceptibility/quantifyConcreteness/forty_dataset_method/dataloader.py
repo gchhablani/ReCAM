@@ -114,6 +114,8 @@ class ConcretenessDataset(object):
 
             a = instance["Word"]
             label = instance["Conc.M"]
+            print(a)
+            print(label)
 
             query = str(a).lower().split("_")
             query = " ".join(query)

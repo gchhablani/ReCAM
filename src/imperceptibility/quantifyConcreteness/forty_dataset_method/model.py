@@ -47,4 +47,5 @@ class TwoLayerNN(torch.nn.Module):
         output = self.linear1(last_hidden_state_cls)
         output = self.relu(output)
         x_output = self.linear2(output)
+        # x_output = torch.sigmoid(x_output)
         return x_output
