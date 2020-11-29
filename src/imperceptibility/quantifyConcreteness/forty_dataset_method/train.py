@@ -3,7 +3,7 @@ import sys
 import math
 import os
 
-sys.path.append("./src/imperceptibility/quantifyConcreteness")
+sys.path.append("./src/imperceptibility/quantifyConcreteness/forty_dataset_method")
 
 
 import torch
@@ -39,14 +39,14 @@ def main():
     parser.add_argument(
         "--train_file_path",
         type=str,
-        default="data/Imperceptibility/Concreteness Ratings/train/AC_ratings_google3m_koeper_SiW.csv",
+        default="data/Imperceptibility/Concreteness Ratings/train/forty.csv",
         help="path of csv file",
     )
 
     parser.add_argument(
         "--val_file_path",
         type=str,
-        default="data/Imperceptibility/Concreteness Ratings/val/AC_ratings_google3m_koeper_SiW.csv",
+        default="data/Imperceptibility/Concreteness Ratings/val/forty.csv",
         help="path of csv file",
     )
 

@@ -1,6 +1,8 @@
 import yaml
 import torch
 
+import time
+
 from transformers import BertForMaskedLM, BertConfig
 from transformers import BertTokenizerFast
 from transformers import LineByLineTextDataset
@@ -38,7 +40,10 @@ def main():
     t0 = time.time()
 
     dataset = LineByLineTextDataset(
-        tokenizer=tokenizer, file_path=args["input_data_file"], block_size=512,
+        tokenizer=tokenizer, file_path=args["train_data_file"], block_size=512,
+    )
+    val_dataset = LineByLineTextDataset(
+        tokenizer=tokenizer, file_path=args["val_data_file"], block_size=512,
     )
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=True, mlm_probability=args["mlm_probability"]
@@ -50,10 +55,16 @@ def main():
     training_args = TrainingArguments(
         output_dir=args["save_model_directory"],
         overwrite_output_dir=True,
+        do_train=True,
+        do_eval=True,
+        logging_steps=args["logging_steps"],
+        evaluation_strategy="steps",
+        eval_steps=args["eval_steps"],
         num_train_epochs=args["num_train_epochs"],
         per_device_train_batch_size=args["batch_size"],
+        per_device_eval_batch_size=args["batch_size"],
         save_steps=args["save_steps"],
-        save_total_limit=2,
+        disable_tqdm=False,
     )
 
     trainer = Trainer(
@@ -61,7 +72,7 @@ def main():
         args=training_args,
         data_collator=data_collator,
         train_dataset=dataset,
-        prediction_loss_only=True,
+        eval_dataset=val_dataset,
     )
 
     trainer.train()
