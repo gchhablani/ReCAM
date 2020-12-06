@@ -1,4 +1,5 @@
 import yaml
+import os
 import torch
 
 import time
@@ -9,11 +10,12 @@ from transformers import LineByLineTextDataset
 from transformers import DataCollatorForLanguageModeling
 from transformers import Trainer, TrainingArguments
 
-
 def main():
 
     # load the args from yaml file
-    with open("bert_finetune.yaml") as file:
+    yaml_file = "bert_finetune.yaml"
+    curr_dir = os.path.dirname(__file__)
+    with open(os.path.join(curr_dir, yaml_file)) as file:
         args = yaml.load(file, Loader=yaml.FullLoader)
 
     print("Printing Arguments...")
@@ -37,7 +39,7 @@ def main():
 
     # load the dataset
     print("\nLoading the dataset")
-    t0 = time.time()
+    t_0 = time.time()
 
     dataset = LineByLineTextDataset(
         tokenizer=tokenizer, file_path=args["train_data_file"], block_size=512,
@@ -49,7 +51,7 @@ def main():
         tokenizer=tokenizer, mlm=True, mlm_probability=args["mlm_probability"]
     )
 
-    print("Time taken: " + str(time.time() - t0))
+    print("Time taken: " + str(time.time() - t_0))
 
     # training
     training_args = TrainingArguments(
