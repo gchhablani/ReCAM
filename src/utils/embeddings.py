@@ -2,6 +2,7 @@
 
 from torch.nn import Module, Embedding, Flatten
 
+
 class GloveEmbedding(Module):
     """Implement Glove based Word Embedding."""
 
@@ -19,6 +20,7 @@ class GloveEmbedding(Module):
         if static:
             self.embedding.weight.required_grad = False
         self.flatten = Flatten(start_dim=1)
+
     def forward(self, x_input):
         """Pass the input through the embedding.
 

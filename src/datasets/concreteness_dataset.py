@@ -3,6 +3,7 @@
 import pandas as pd
 from torch.utils.data import Dataset
 
+
 class ConcretenessDataset(Dataset):
     """Implement dataset for Concreteness Ratings.
 
@@ -29,10 +30,13 @@ class ConcretenessDataset(Dataset):
         """
         super(ConcretenessDataset, self).__init__()
 
-        self.data = pd.read_csv(file_path, error_bad_lines=False, delimiter="\t")[['Word','Conc.M']].dropna()
+        self.data = pd.read_csv(file_path, error_bad_lines=False, delimiter="\t")[
+            ["Word", "Conc.M"]
+        ].dropna()
         self.tokenizer = tokenizer
         self.tokenizer_params = tokenizer_params
         self.split = split
+
     def __len__(self):
         """Return the length of data.
 
@@ -41,6 +45,7 @@ class ConcretenessDataset(Dataset):
         """
         shape = self.data.shape[0]
         return shape
+
     def __getitem__(self, idx):
         """Get processed text and label at a particular index.
 
@@ -52,11 +57,13 @@ class ConcretenessDataset(Dataset):
             word (torch.Tensor), value(int) is self.split is not "test".
         """
         record = self.data.iloc[idx]
-        word = record['Word']
+        word = record["Word"]
         if self.tokenizer is not None:
-            word = self.tokenizer.tokenize(word, fields=["Word"], **self.tokenizer_params)
+            word = self.tokenizer.tokenize(
+                word, fields=["Word"], **self.tokenizer_params
+            )
         if self.split == "test":
             return word
-        value = record['Conc.M']
+        value = record["Conc.M"]
         # print(word,value)
         return word, value

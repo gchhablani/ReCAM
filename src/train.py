@@ -110,31 +110,31 @@ def main():
     print("Loading data...")
     seed()
 
-    tokenizer = GloveTokenizer(cache='./embeddings/')
-    tokenizer.initialize_vectors(tokenizer_file_paths=[train_file_path,val_file_path],fields=["Word"])
-    embeddings = GloveEmbedding(tokenizer.text_field.vocab.vectors, tokenizer.text_field.vocab.stoi[tokenizer.text_field.pad_token])
+    tokenizer = GloveTokenizer(cache="./embeddings/")
+    tokenizer.initialize_vectors(
+        tokenizer_file_paths=[train_file_path, val_file_path], fields=["Word"]
+    )
+    embeddings = GloveEmbedding(
+        tokenizer.text_field.vocab.vectors,
+        tokenizer.text_field.vocab.stoi[tokenizer.text_field.pad_token],
+    )
 
     train_dataset = ConcretenessDataset(
-        file_path=train_file_path,
-        tokenizer=tokenizer,
-        split="train"
+        file_path=train_file_path, tokenizer=tokenizer, split="train"
     )
     validation_dataset = ConcretenessDataset(
-        file_path=val_file_path,
-        tokenizer=tokenizer,
-        split="val",
+        file_path=val_file_path, tokenizer=tokenizer, split="val",
     )
 
     print("Loading the model...")
-    model = TwoLayerNN(embeddings,dims=[1200,128,1])
+    model = TwoLayerNN(embeddings, dims=[1200, 128, 1])
     model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=lr)
     loss_fn = torch.nn.MSELoss()
 
-    train_loader = DataLoader(train_dataset,batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(validation_dataset,batch_size=batch_size,shuffle=False)
-
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=False)
 
     for epoch in range(1, epochs + 1):
         print("Epoch: {}".format(epoch))

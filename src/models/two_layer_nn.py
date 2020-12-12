@@ -3,6 +3,7 @@
 from torch.nn import Module, Linear, ReLU
 from src.utils.embeddings import GloveEmbedding
 
+
 class TwoLayerNN(Module):
     """Implements two layer neural network.
 
@@ -26,7 +27,6 @@ class TwoLayerNN(Module):
         self.linear1 = Linear(dims[0], dims[1])
         self.relu = ReLU()
         self.linear2 = Linear(dims[1], dims[2])
-
 
     def forward(self, x_input):
         """
