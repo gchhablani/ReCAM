@@ -38,7 +38,6 @@ class Logger():
                 if(global_step is None):
                     self.writer.add_scalar(param_name_list[i],param_list[i],Logger._global_step(epoch,batch_size,batch))
                 else:
-                    print("Here")
                     self.writer.add_scalar(param_name_list[i],param_list[i],global_step)
 
 
