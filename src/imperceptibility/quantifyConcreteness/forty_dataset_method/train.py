@@ -1,3 +1,4 @@
+"""Train some model."""
 import argparse
 import sys
 import math

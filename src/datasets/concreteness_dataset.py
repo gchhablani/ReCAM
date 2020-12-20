@@ -2,15 +2,16 @@
 
 import pandas as pd
 from torch.utils.data import Dataset
+from src.utils.mapper import configmapper
 
-
+@configmapper.map("datasets", "concreteness")
 class ConcretenessDataset(Dataset):
     """Implement dataset for Concreteness Ratings.
 
     Attributes:
+        config (src.utils.configuration.Config): The configuration for the dataset class
         data (pandas.DataFrame): The dataframe object containing the ratings
-        tokenizer (src.utils.Tokenizer): The tokenizer object to be used to tokenize text
-        split (str): Whether the split is "train", "val" or "test"
+        PREPRO (src.utils.Tokenizer): The tokenizer object to be used to tokenize text
 
     Methods:
         __init__(file_path,tokenizer,split): initialize the dataset
@@ -18,24 +19,20 @@ class ConcretenessDataset(Dataset):
         __getitem__(idx): get item at a particular index
     """
 
-    def __init__(self, file_path, tokenizer, split="train", **tokenizer_params):
+    def __init__(self, config, tokenizer):
         """Construct the ConcretenessDataset.
 
         Args:
-            file_path (str): File path for dataset.
-            tokenizer (src.utils.Tokenizer): The tokenizer object to be used to tokenize text
-            split (str): Whether the split is "train", "val" or "test"
-            **tokenizer_params (keyword arguments): Keyword arguments for tokenizer
-
+            config (src.utils.configuration.Config): Configuration for the dataset class
+            tokenizer (src.modules.tokenizer.Tokenizer): Tokenizer for the dataset class
         """
         super(ConcretenessDataset, self).__init__()
 
-        self.data = pd.read_csv(file_path, error_bad_lines=False, delimiter="\t")[
-            ["Word", "Conc.M"]
+        self.config = config
+        self.data = pd.read_csv(self.config.file_path, error_bad_lines=False, delimiter="\t")[
+            self.config.text_cols+[self.config.label_col,]
         ].dropna()
         self.tokenizer = tokenizer
-        self.tokenizer_params = tokenizer_params
-        self.split = split
 
     def __len__(self):
         """Return the length of data.
@@ -57,13 +54,13 @@ class ConcretenessDataset(Dataset):
             word (torch.Tensor), value(int) is self.split is not "test".
         """
         record = self.data.iloc[idx]
-        word = record["Word"]
+        word = record[self.config.text_cols]
         if self.tokenizer is not None:
             word = self.tokenizer.tokenize(
-                word, fields=["Word"], **self.tokenizer_params
+                word, **self.config.preprocessor.tokenizer.init_vector_params.as_dict()
             )
-        if self.split == "test":
+        if self.config.split == "test":
             return word
-        value = record["Conc.M"]
+        value = record[self.config.label_col]
         # print(word,value)
         return word, value

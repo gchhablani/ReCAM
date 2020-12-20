@@ -3,6 +3,7 @@
 import torch
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset
+from src.utils.mapper import configmapper
 
 
 class Tokenizer:
@@ -11,7 +12,7 @@ class Tokenizer:
     def tokenize(self):
         """Abstract Method for tokenization."""
 
-
+@configmapper.map("tokenizers", "glove")
 class GloveTokenizer(Tokenizer):
     """Implement GloveTokenizer for tokenizing text for Glove Embeddings.
 
@@ -28,7 +29,7 @@ class GloveTokenizer(Tokenizer):
         tokenize(x_input, **initializer_params): Tokenize given input and return the output.
     """
 
-    def __init__(self, name="840B", dim="300", cache="../embeddings/"):
+    def __init__(self, name='840B', dim='300', cache='../embeddings/'):
         """Construct GloveTokenizer.
 
         Args:
@@ -40,14 +41,9 @@ class GloveTokenizer(Tokenizer):
         self.embeddings = GloVe(name=name, dim=dim, cache=cache)
         self.text_field = None
 
-    def initialize_vectors(
-        self,
-        fix_length=4,
-        tokenize="spacy",
-        tokenizer_file_paths=None,
-        file_format="tsv",
-        fields=None,
-    ):
+    def initialize_vectors(self, fix_length=4,
+                           tokenize='spacy',
+                           tokenizer_file_paths=None, file_format='tsv', fields=None):
         """Initialize words/sequences based on GloVe embedding.
 
         Args:
@@ -63,17 +59,14 @@ class GloveTokenizer(Tokenizer):
             format (str): The format of the file : 'csv', 'tsv' or 'json'
         """
         text_field = Field(batch_first=True, fix_length=fix_length, tokenize=tokenize)
-        tab_dats = [
-            TabularDataset(
-                i, format=file_format, fields={k: (k, text_field) for k in fields}
-            )
-            for i in tokenizer_file_paths
-        ]
+        tab_dats = [TabularDataset(i, format=file_format, fields=
+                                   {k: (k, text_field) for k in fields})
+                    for i in tokenizer_file_paths]
         text_field.build_vocab(*tab_dats)
         text_field.vocab.load_vectors(self.embeddings)
         self.text_field = text_field
 
-    def tokenize(self, x_input, **initializer_params):
+    def tokenize(self, x_input, **init_vector__params):
         """Tokenize given input based on initialized vectors.
 
         Initialize the vectors with given parameters if not already initialized.
@@ -86,11 +79,9 @@ class GloveTokenizer(Tokenizer):
             x_output (str): Processed and tokenized text
         """
         if self.text_field is None:
-            self.initialize_vectors(**initializer_params)
+            self.initialize_vectors(**init_vector__params)
         try:
-            x_output = torch.squeeze(
-                self.text_field.process([self.text_field.preprocess(x_input)])
-            )
+            x_output = torch.squeeze(self.text_field.process([self.text_field.preprocess(x_input)]))
         except Exception as e:
             print(x_input)
             print(self.text_field.preprocess(x_input))

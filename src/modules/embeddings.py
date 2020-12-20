@@ -1,8 +1,9 @@
 """Contains various kinds of embeddings like Glove, BERT, etc."""
 
 from torch.nn import Module, Embedding, Flatten
+from src.utils.mapper import configmapper
 
-
+@configmapper.map("embeddings", "glove")
 class GloveEmbedding(Module):
     """Implement Glove based Word Embedding."""
 
@@ -20,7 +21,6 @@ class GloveEmbedding(Module):
         if static:
             self.embedding.weight.required_grad = False
         self.flatten = Flatten(start_dim=1)
-
     def forward(self, x_input):
         """Pass the input through the embedding.
 

@@ -1,6 +1,8 @@
 # ReCAM
 Our repository for the code, literature review, and results on SemEval-2021 Task 4:  Reading Comprehension of Abstract Meaning
 
+## Usage
+1. Run the setup.py file for imports to work : `python setup.py install`
 
 ## Tasks
 

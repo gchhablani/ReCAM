@@ -1,0 +1,62 @@
+name: forty
+version: 1.0
+main_config: &main
+    seed: !!int 42
+    metrics:
+        - sklearn_mse
+    device:
+        name: 'cpu'
+
+train: &train
+    # Change to different value if not using max_steps
+    <<: *main
+    # Can add the max_epochs vs max_steps functionality
+    max_epochs: !!int 10
+    val_interval: !!int 100 # Global steps
+    loader_params:
+        batch_size: !!int 32
+        num_workers: !!int 4
+        shuffle: true
+    optimizer:
+        type: adam_w
+        params:
+            lr: !!float 1e-5
+            betas: [0.9,0.998]
+            eps: !!float 1e-8
+    scheduler: null
+    criterion:
+        type: mse
+        params: null
+    checkpoint:
+        checkpoint_dir: './ckpts/forty/train'
+    log:
+        log_interval: !!int 100 # Global Steps
+        logger_params:
+            model: two_layer_nn
+            trainer: forty
+            comment: "Trial for Logger and Trainer"
+            log_dir: './logs/forty/train'
+        log_label: 1
+        values:
+            loss: true
+            metrics: true
+            # hparams: true
+
+val:
+    <<: *main
+    max_steps: null
+    loader_params:
+        batch_size: !!int 32
+        num_workers: !!int 4
+        shuffle: false
+    log:
+        logger_params:
+            model: two_layer_nn
+            trainer: forty
+            comment: "Trial for Logger and Trainer"
+            log_dir: './logs/forty/eval'
+        log_label: 1
+        values:
+            loss: true
+            metrics: true
+            # hparams: true
