@@ -45,11 +45,12 @@ class BERTConcreteness(torch.nn.Module):
                 x (dict): The input dict to the neural network (see input format of BertForSequenceClassification on https://huggingface.co/transformers/model_doc/bert.html#bertforsequenceclassification)
             
             Returns:
-                output (transformers.modeling_outputs.SequenceClassifierOutput): loss/hidden_states, etc. 
+                output (transformers.modeling_outputs.SequenceClassifierOutput.logits): list containing predicted concreteness scores, etc. 
         """
 
         output = self.bert(**x)
-        return output
+
+        return output.logits.view(-1)
 
     def freeze_bert_fn(
         self,
