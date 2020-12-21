@@ -7,10 +7,12 @@ from torchviz import make_dot
 
 
 class Logger:
-    """"""
+    """
+
+    """
 
     def __init__(self, model, trainer, log_dir, comment=None):
-        """Initializer for Logger Class
+        """ Initializer for Logger Class
         #Arguments:
 
         """
