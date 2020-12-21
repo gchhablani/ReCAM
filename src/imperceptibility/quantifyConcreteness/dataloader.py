@@ -53,14 +53,14 @@ class ConcretenessDataset(Dataset):
 
 class ConcretenessDataset(object):
     """
-        Args:
-            data_path: (list) Path of the pickled list
-            Format of the list: [{'queryid': query, 'docid': doc,'label': label}, ...]
-            where query, doc are strings and label is an integer.
-            batch_size: (int) 
-            tokenizer: 
-            split: randomly shuffle dataset if split='training'
-            device: 'cpu' or 'cuda'
+    Args:
+        data_path: (list) Path of the pickled list
+        Format of the list: [{'queryid': query, 'docid': doc,'label': label}, ...]
+        where query, doc are strings and label is an integer.
+        batch_size: (int)
+        tokenizer:
+        split: randomly shuffle dataset if split='training'
+        device: 'cpu' or 'cuda'
     """
 
     def __init__(

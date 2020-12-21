@@ -79,7 +79,10 @@ def main():
     )
 
     parser.add_argument(
-        "--tensorboard_label_number", type=str, default="1", help="logging number",
+        "--tensorboard_label_number",
+        type=str,
+        default="1",
+        help="logging number",
     )
 
     parser.add_argument("--lr", type=float, default=1e-5, help="learning rate")

@@ -4,6 +4,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 from src.utils.mapper import configmapper
 
+
 @configmapper.map("datasets", "concreteness")
 class ConcretenessDataset(Dataset):
     """Implement dataset for Concreteness Ratings.
@@ -29,8 +30,13 @@ class ConcretenessDataset(Dataset):
         super(ConcretenessDataset, self).__init__()
 
         self.config = config
-        self.data = pd.read_csv(self.config.file_path, error_bad_lines=False, delimiter="\t")[
-            self.config.text_cols+[self.config.label_col,]
+        self.data = pd.read_csv(
+            self.config.file_path, error_bad_lines=False, delimiter="\t"
+        )[
+            self.config.text_cols
+            + [
+                self.config.label_col,
+            ]
         ].dropna()
         self.tokenizer = tokenizer
 

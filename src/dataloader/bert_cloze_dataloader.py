@@ -16,8 +16,8 @@ class ReCAMDataset(Dataset):
 
     def __getitem__(self, idx):
         """
-            returns: sample -> List ([article,article_masks,options,answer_index,answer])
-            (all with tokenized input ids)
+        returns: sample -> List ([article,article_masks,options,answer_index,answer])
+        (all with tokenized input ids)
         """
 
         # self.data[idx]['article_mask'] = [1]*(len(self.data[idx]['article']['input_ids']))

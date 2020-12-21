@@ -1,6 +1,7 @@
 import yaml
 from src.utils.mapper import configmapper
 
+
 def load_yaml(path):
     """
     Function to load a yaml file and
@@ -17,25 +18,29 @@ def load_yaml(path):
         The dictionary from the config file
     """
 
-    assert isinstance(path,str), "Provided path is not a string"
+    assert isinstance(path, str), "Provided path is not a string"
     try:
-        f = open(path,'r')
-        result = yaml.load(f,Loader=yaml.Loader)
+        f = open(path, "r")
+        result = yaml.load(f, Loader=yaml.Loader)
     except FileNotFoundError as e:
         # Adding this for future functionality
         raise e
     return result
 
+
 def convert_params_to_dict(params):
     dic = {}
-    for k,v in params.as_dict():
+    for k, v in params.as_dict():
         try:
-            obj = configmapper.get_object('params',v)
-            dic[k]=v
+            obj = configmapper.get_object("params", v)
+            dic[k] = v
         except:
-            print(f"Undefined {v} for the given key: {k} in mapper        ,storing original value")
-            dic[k]=v
+            print(
+                f"Undefined {v} for the given key: {k} in mapper        ,storing original value"
+            )
+            dic[k] = v
         return value
+
 
 class Config:
     """Config Class to be used with YAML configuration files
@@ -62,7 +67,8 @@ class Config:
     set_value(attr,value)
         Set the value of a particular attribute.
     """
-    def __init__(self,*,path=None,dic=None):
+
+    def __init__(self, *, path=None, dic=None):
         """
         Initializer for the Config class
 
@@ -77,15 +83,15 @@ class Config:
             The dictionary containing the configuration.
             Default value is None.
         """
-        if(path):
+        if path:
             self._config = load_yaml(path)
-        elif(dict):
+        elif dict:
             self._config = dic
         else:
-            raise Exception('Need either path or dict object to instantiate object.')
+            raise Exception("Need either path or dict object to instantiate object.")
         # self.keys = self._config.keys()
 
-    def __getattr__(self,attr):
+    def __getattr__(self, attr):
         """
         Get method for Config class. Helps get keys as attributes.
 
@@ -106,14 +112,15 @@ class Config:
 
         KeyError() if the given key is not defined.
         """
-        if(attr in self._config):
-            if(isinstance(self._config[attr],dict)):
+        if attr in self._config:
+            if isinstance(self._config[attr], dict):
                 return Config(dic=self._config[attr])
             else:
                 return self._config[attr]
         else:
             raise KeyError(f"Key:{attr} not defined.")
-    def set_value(self,attr,value):
+
+    def set_value(self, attr, value):
         """
         Set method for Config class. Helps set keys in the _config.
 
@@ -122,11 +129,11 @@ class Config:
         attr: The attribute name passed as <object>.attr
         value: The value to be stored as the attr.
         """
-        self._config[attr]=value
+        self._config[attr] = value
 
     def __str__(self):
-        """ Function to print the dictionary
-         contained in the object."""
+        """Function to print the dictionary
+        contained in the object."""
         return self._config.__str__()
 
     def as_dict(self):

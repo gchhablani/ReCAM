@@ -20,14 +20,14 @@ def seed(value=42):
 
 def map_dict_to_obj(dic):
     result_dic = {}
-    if(dic is not None):
-        for k,v in dic.items():
-            if(isinstance(v,dict)):
-                result_dic[k]=map_dict_to_obj(v)
+    if dic is not None:
+        for k, v in dic.items():
+            if isinstance(v, dict):
+                result_dic[k] = map_dict_to_obj(v)
             else:
                 try:
-                    obj = configmapper.get_object('params',v)
-                    result_dic[k]=obj
+                    obj = configmapper.get_object("params", v)
+                    result_dic[k] = obj
                 except:
-                    result_dic[k]=v
+                    result_dic[k] = v
     return result_dic

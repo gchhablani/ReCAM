@@ -13,21 +13,23 @@ class ConfigMapper:
     -------
 
     """
+
     dicts = {
-        "models":{},
-        "trainers":{},
-        "metrics":{},
-        "losses":{},
-        "optimizers":{},
-        "schedulers":{},
-        "devices":{},
-        "embeddings":{},
-        "params":{},
-        "datasets":{},
-        "preprocessors":{},
+        "models": {},
+        "trainers": {},
+        "metrics": {},
+        "losses": {},
+        "optimizers": {},
+        "schedulers": {},
+        "devices": {},
+        "embeddings": {},
+        "params": {},
+        "datasets": {},
+        "preprocessors": {},
     }
+
     @classmethod
-    def map(cls,key,name):
+    def map(cls, key, name):
         """
         Map a particular name to an object, in the specified key
 
@@ -38,21 +40,24 @@ class ConfigMapper:
             key : str
                 The key of the mapper to be used.
         """
+
         def wrap(obj):
-            if(key in cls.dicts.keys()):
-                cls.dicts[key][name]=obj
+            if key in cls.dicts.keys():
+                cls.dicts[key][name] = obj
             else:
                 cls.dicts[key] = {}
-                cls.dicts[key][name]=obj
+                cls.dicts[key][name] = obj
             return obj
+
         return wrap
 
     @classmethod
-    def get_object(cls,key,name):
-        """
-        """
+    def get_object(cls, key, name):
+        """"""
         try:
             return cls.dicts[key][name]
         except:
-            raise NotImplementedError('Key Undefined.')
+            raise NotImplementedError("Key Undefined.")
+
+
 configmapper = ConfigMapper()
