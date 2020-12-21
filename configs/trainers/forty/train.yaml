@@ -60,3 +60,24 @@ val:
             loss: true
             metrics: true
             # hparams: true
+grid_search:
+  directory: null
+  hyperparams:
+    train:
+      loader_params:
+        batch_size:
+          - !!int 32
+          - !!int 64
+      optimizer:
+        type:
+          - adam_w
+          - adam
+        params:
+          lr:
+            - !!float 1e-5
+            - !!float 1e-6
+            - !!float 1e-7
+          betas:
+            - [0.9,0.998]
+            - [0.9,0.999]
+            - [0.95,0.998]

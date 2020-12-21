@@ -53,8 +53,7 @@ class ConfigMapper:
 
     @classmethod
     def get_object(cls, key, name):
-        """
-        """
+        """"""
         try:
             return cls.dicts[key][name]
         except:

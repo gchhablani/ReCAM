@@ -1,4 +1,5 @@
 import yaml
+import copy
 from src.utils.mapper import configmapper
 
 
@@ -135,6 +136,12 @@ class Config:
         """Function to print the dictionary
         contained in the object."""
         return self._config.__str__()
+
+    def __repr__(self):
+        return f"Config(dic={self._config})"
+
+    def __deepcopy__(self, memo):
+        return Config(dic=copy.deepcopy(self._config))
 
     def as_dict(self):
         """Function to get the config as dictionary object"""

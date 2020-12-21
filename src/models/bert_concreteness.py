@@ -7,20 +7,20 @@ from src.utils.mapper import configmapper
 class BERTConcreteness(torch.nn.Module):
 
     """
-        Implements BERT with a Linear Layer on top to perform the task of regression on the Concreteness Dataset.
+    Implements BERT with a Linear Layer on top to perform the task of regression on the Concreteness Dataset.
 
-        Methods:
-            forward(x): Returns the output of the Neural Network
+    Methods:
+        forward(x): Returns the output of the Neural Network
     """
 
     def __init__(self, model_name="bert-base-uncased", freeze_layers=10):
 
         """
-            Constructs the Neural Network---BERT with Linear Layer atop [CLS]'s embedding
+        Constructs the Neural Network---BERT with Linear Layer atop [CLS]'s embedding
 
-            Args:
-                model_name (str): One of "bert-base-uncased"/"bert-large-uncased"
-                freeze_layers (int): Number of BERT encoder layers to freeze
+        Args:
+            model_name (str): One of "bert-base-uncased"/"bert-large-uncased"
+            freeze_layers (int): Number of BERT encoder layers to freeze
         """
 
         super(BERTConcreteness, self).__init__()
@@ -40,13 +40,13 @@ class BERTConcreteness(torch.nn.Module):
     def forward(self, x):
 
         """
-            Return the output of the neural network for an input.
-            
-            Args:
-                x (dict): The input dict to the neural network (see input format of BertForSequenceClassification on https://huggingface.co/transformers/model_doc/bert.html#bertforsequenceclassification)
-            
-            Returns:
-                output (transformers.modeling_outputs.SequenceClassifierOutput.logits): list containing predicted concreteness scores, etc. 
+        Return the output of the neural network for an input.
+
+        Args:
+            x (dict): The input dict to the neural network (see input format of BertForSequenceClassification on https://huggingface.co/transformers/model_doc/bert.html#bertforsequenceclassification)
+
+        Returns:
+            output (transformers.modeling_outputs.SequenceClassifierOutput.logits): list containing predicted concreteness scores, etc.
         """
 
         output = self.bert(**x)
@@ -61,15 +61,15 @@ class BERTConcreteness(torch.nn.Module):
     ):
 
         """
-            Returns the model with the top "freeze_layers" layers frozen.
+        Returns the model with the top "freeze_layers" layers frozen.
 
-            Args:
-                model (transformers.models.bert.modeling_bert.BertForSequenceClassification): model whose layers are to be frozen
-                freeze_layers (list): The layers to be frozen
-                freeze_embeddings (boolean)
+        Args:
+            model (transformers.models.bert.modeling_bert.BertForSequenceClassification): model whose layers are to be frozen
+            freeze_layers (list): The layers to be frozen
+            freeze_embeddings (boolean)
 
-            Returns:
-                model (transformers.models.bert.modeling_bert.BertForSequenceClassification) with frozen layers
+        Returns:
+            model (transformers.models.bert.modeling_bert.BertForSequenceClassification) with frozen layers
         """
 
         if freeze_embeddings:

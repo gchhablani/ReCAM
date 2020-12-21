@@ -3,6 +3,8 @@
 import random
 import numpy as np
 import torch
+import copy
+import itertools
 
 
 def seed(value=42):
@@ -31,3 +33,76 @@ def map_dict_to_obj(dic):
                 except:
                     result_dic[k] = v
     return result_dic
+
+
+def get_item_in_config(config, path):
+    ## config is a dictionary
+    curr = config
+    if isinstance(config, dict):
+        for step in path:
+            curr = curr[step]
+    else:
+        for step in path:
+            curr = curr.__getattr__(step)
+    return curr
+
+
+# init = train_config.grid_search
+# curr = get_item_in_config(init,['hyperparams','loader_params'])
+# curr.set_value('batch_size',1)
+# print(train_config.grid_search)
+
+
+def generate_grid_search_configs(main_config, grid_config, root="hyperparams"):
+    ## DFS
+    locations_values_pair = {}
+    init = grid_config.as_dict()
+    # print(init)
+    stack = [root]
+    visited = [stack[-1]]
+
+    # root = init[stack[-1]]
+    while len(stack) != 0:
+        root = get_item_in_config(init, stack)
+        flag = 0
+        # print(visited)
+        # print(stack)
+        if isinstance(root, list):  ## Meaning it is a leaf node
+            # print(stack)
+            locations_values_pair[
+                tuple(copy.deepcopy(stack))
+            ] = root  ## Append the current stack, and the list values
+            _ = stack.pop()  ## Pop this root because we don't need it.
+        else:
+            parent = root  ## Otherwise it has children
+
+        for key in parent.keys():  ## For the children
+            if (
+                ".".join(
+                    stack
+                    + [
+                        key,
+                    ]
+                )
+                not in visited
+            ):  ## Check if I have visited these children
+                flag = 1  ## If not, we need to repeat the process for this key
+                stack.append(key)  ## Append this key to the stack
+                visited.append(".".join(stack))
+                break
+        if flag == 0:
+            stack.pop()
+
+    paths = list(locations_values_pair.keys())
+    values = itertools.product(*list(locations_values_pair.values()))
+
+    result_configs = []
+    for value in values:
+        for item_index in range(len(value)):
+            curr_path = paths[item_index]
+            curr_item = value[item_index]
+
+            curr_config_item = get_item_in_config(main_config, curr_path[1:-1])
+            curr_config_item.set_value(curr_path[-1], curr_item)
+        result_configs.append(copy.deepcopy(main_config))
+    return result_configs

@@ -15,26 +15,27 @@ from src.utils.mapper import configmapper
 @configmapper.map("datasets", "bert_concreteness")
 class BertConcretenessDataset(Dataset):
     """Implements the ConcretenessDataset for Concreteness Ratings.
-    
-        Args:
-            config (src.utils.configuration.Config): The configuration for the dataset class
 
-        Methods:
-            __init__(config): constructor for preprocessing and initialising the dataset
-            __len__(): Number of samples in the dataset
-            __getitem__(idx): Returns the sample corresponding to index=idx in the dataset
-            custom_collate_fn(batch): Returns the batch that will be the input to the model
+    Args:
+        config (src.utils.configuration.Config): The configuration for the dataset class
+
+    Methods:
+        __init__(config): constructor for preprocessing and initialising the dataset
+        __len__(): Number of samples in the dataset
+        __getitem__(idx): Returns the sample corresponding to index=idx in the dataset
+        custom_collate_fn(batch): Returns the batch that will be the input to the model
     """
 
     def __init__(
-        self, config,
+        self,
+        config,
     ):
 
         """
-            Construct the BertConcretenessDataset.
-            
-            Args:
-                config (src.utils.configuration.Config): Configuration for the dataset class
+        Construct the BertConcretenessDataset.
+
+        Args:
+            config (src.utils.configuration.Config): Configuration for the dataset class
         """
         super(ConcretenessDataset, self).__init__()
         # self.data = pickle.load(open(data_path, "rb"))
@@ -50,22 +51,22 @@ class BertConcretenessDataset(Dataset):
     def __len__(self):
 
         """
-            Return the length of data.
-            
-            Returns:
-                shape (int): length of the data
+        Return the length of data.
+
+        Returns:
+            shape (int): length of the data
         """
 
         return len(self.data)
 
     def __getitem__(self, idx):
         """
-            Get processed text and label at a particular index.
-            
-            Args:
-                idx (int): The index of the record to be fetched.
-            Returns:
-                inputs (dict): inputs with keys "input_ids", "token_type_ids", "attention_mask", "labels"
+        Get processed text and label at a particular index.
+
+        Args:
+            idx (int): The index of the record to be fetched.
+        Returns:
+            inputs (dict): inputs with keys "input_ids", "token_type_ids", "attention_mask", "labels"
         """
 
         text = self.data[idx]["Word"]
@@ -81,12 +82,12 @@ class BertConcretenessDataset(Dataset):
 
     def custom_collate_fn(self, batch):
         """
-            Get a tuple of input dictionaries and returns the batched inputs dictionary.
-            
-            Args:
-                batch (tuple of dict)
-            Returns:
-                inputs (dict of torch tensors): keys "input_ids", "token_type_ids", "attention_mask", "labels"
+        Get a tuple of input dictionaries and returns the batched inputs dictionary.
+
+        Args:
+            batch (tuple of dict)
+        Returns:
+            inputs (dict of torch tensors): keys "input_ids", "token_type_ids", "attention_mask", "labels"
         """
 
         pad_id = self.tokenizer.convert_tokens_to_ids("[PAD]")
