@@ -1,5 +1,6 @@
 import torch
 from transformers import BertModel, BertForSequenceClassification
+from src.utils.mapper import configmapper
 
 
 @configmapper.map("models", "bert_concreteness")
