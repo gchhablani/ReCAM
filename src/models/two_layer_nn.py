@@ -3,6 +3,7 @@
 from torch.nn import Module, Linear, ReLU
 from src.utils.mapper import configmapper
 
+
 @configmapper.map("models", "two_layer_nn")
 class TwoLayerNN(Module):
     """Implements two layer neural network.
