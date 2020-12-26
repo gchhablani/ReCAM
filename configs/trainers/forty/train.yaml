@@ -11,24 +11,39 @@ train: &train
     # Change to different value if not using max_steps
     <<: *main
     # Can add the max_epochs vs max_steps functionality
+    append_text: train
     max_epochs: !!int 10
-    val_interval: !!int 100 # Global steps
     loader_params:
         batch_size: !!int 32
         num_workers: !!int 4
         shuffle: true
+
     optimizer:
         type: adam_w
         params:
             lr: !!float 1e-5
             betas: [0.9,0.998]
             eps: !!float 1e-8
+
     scheduler: null
+
     criterion:
         type: mse
         params: null
+
+    save_on : ##Best Model Saving
+      score: mse
+      desired: min
+      best_path: './ckpts/forty/train/best_{}.pth'
+      final_path: './ckpts/forty/train/final_{}.pth'
+
+
     checkpoint:
-        checkpoint_dir: './ckpts/forty/train'
+        checkpoint_dir: './ckpts/forty/'
+
+    log_and_val_interval: !!int 100 ## Set to null if using different val and log intervals, Overrides log_interval nd val_interval
+
+    val_interval: !!int 100 # Global steps
     log:
         log_interval: !!int 100 # Global Steps
         logger_params:
@@ -40,44 +55,63 @@ train: &train
         values:
             loss: true
             metrics: true
-            # hparams: true
+            hparams: null
 
 val:
     <<: *main
+    append_text: val
     max_steps: null
     loader_params:
         batch_size: !!int 32
         num_workers: !!int 4
         shuffle: false
-    log:
-        logger_params:
-            model: two_layer_nn
-            trainer: forty
-            comment: "Trial for Logger and Trainer"
-            log_dir: './logs/forty/eval'
-        log_label: 1
-        values:
-            loss: true
-            metrics: true
+    # log:
+    #     logger_params:
+    #         model: two_layer_nn
+    #         trainer: forty
+    #         comment: "Trial for Logger and Trainer"
+    #         log_dir: './logs/forty/eval'
+    #     log_label: 1
+    #     values:
+    #         loss: true
+    #         metrics: true
             # hparams: true
 grid_search:
   directory: null
   hyperparams:
     train:
+      max_epochs: !!int 2
       loader_params:
         batch_size:
           - !!int 32
           - !!int 64
-      optimizer:
-        type:
-          - adam_w
-          - adam
-        params:
-          lr:
-            - !!float 1e-5
-            - !!float 1e-6
-            - !!float 1e-7
-          betas:
-            - [0.9,0.998]
-            - [0.9,0.999]
-            - [0.95,0.998]
+      # optimizer:
+      #   # type:
+      #   #   - adam_w
+      #   #   - adam
+      #   params:
+      #     lr:
+      #       - !!float 1e-5
+      #       - !!float 1e-6
+          #   - !!float 1e-7
+          # betas:
+          #   - [0.9,0.998]
+          #   - [0.9,0.999]
+          #   - [0.95,0.998]
+      log:
+        logger_params:
+          log_dir: './logs/gridsearch'
+        log_label: null
+        values:
+          hparams:  ## Can have lists inside hparams
+             - name: batch_size
+               path:
+                  - train
+                  - loader_params
+                  - batch_size
+             - name: learning_rate
+               path:
+                 - train
+                 - optimizer
+                 - params
+                 - lr

@@ -41,7 +41,7 @@ parser.add_argument(
     "--grid_search",
     action="store_true",
     help="Whether to do a grid_search",
-    default=True,
+    default=False,
 )
 ### Update Tips : Can provide more options to the user.
 ### Can also provide multiple verbosity levels.
@@ -70,8 +70,8 @@ if grid_search:
     train_configs = generate_grid_search_configs(train_config, train_config.grid_search)
     print(f"Total Configurations Generated: {len(train_configs)}")
     for train_config in train_configs:
-        # print(train_config)
-        ## Trainer
+        print(train_config)
+        # Trainer
         trainer = configmapper.get_object("trainers", train_config.name)(train_config)
 
         ## Train

@@ -11,7 +11,7 @@ class Logger:
 
     def __init__(self, model, trainer, log_dir, comment=None):
         """Initializer for Logger Class
-        #Arguments:
+        Args:
 
         """
         self.model_path = os.path.join(log_dir, model, trainer)
@@ -84,8 +84,9 @@ class Logger:
     def save_hyperparams(
         self, hparam_list, hparam_name_list, metric_list, metric_name_list
     ):
+        print(hparam_list, hparam_name_list,metric_list,metric_name_list)
         self.writer.add_hparams(
-            zip(metric_name_list, metric_list), zip(hparam_name_list, hparam_list)
+             dict(zip(hparam_name_list, hparam_list)),dict(zip(metric_name_list, metric_list))
         )
 
     def save_models(self, model_list, model_names_list, epoch):
