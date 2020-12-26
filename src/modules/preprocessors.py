@@ -76,7 +76,7 @@ class ClozePreprocessor(Preprocessor):
             data_config.val, self.tokenizer
         )
         model = configmapper.get_object("models", model_config.name)(
-             **model_config.params.as_dict()
+            **model_config.params.as_dict()
         )
 
         return model, train_dataset, val_dataset

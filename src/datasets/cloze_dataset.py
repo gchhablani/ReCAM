@@ -9,7 +9,7 @@ from src.utils.mapper import configmapper
 
 @configmapper.map("datasets", "cloze")
 class ClozeDataset(Dataset):
-    """Implement dataset for Concreteness Ratings.
+    """Implements dataset for Cloze Style Question-Answering.
 
     Attributes:
         config (src.utils.configuration.Config): The configuration for the dataset class
