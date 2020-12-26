@@ -14,7 +14,6 @@ class ClozeDataset(Dataset):
     Attributes:
         config (src.utils.configuration.Config): The configuration for the dataset class
         data : The jsonl/pt containing the articles with question and answer
-        PREPRO (src.utils.Tokenizer): The tokenizer object to be used to tokenize text
 
     Methods:
         __init__(file_path,tokenizer,split): initialize the dataset
