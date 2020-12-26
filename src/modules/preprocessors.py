@@ -48,7 +48,7 @@ class GlovePreprocessor(Preprocessor):
         return model, train_dataset, val_dataset
 
 
-@configmapper.map("preprocessors", "glove")
+@configmapper.map("preprocessors", "clozePreprocessor")
 class ClozePreprocessor(Preprocessor):
     """GlovePreprocessor."""
 
@@ -76,7 +76,7 @@ class ClozePreprocessor(Preprocessor):
             data_config.val, self.tokenizer
         )
         model = configmapper.get_object("models", model_config.name)(
-            self.embeddings, **model_config.params.as_dict()
+             **model_config.params.as_dict()
         )
 
         return model, train_dataset, val_dataset
