@@ -46,3 +46,37 @@ class GlovePreprocessor(Preprocessor):
         )
 
         return model, train_dataset, val_dataset
+
+
+@configmapper.map("preprocessors", "glove")
+class ClozePreprocessor(Preprocessor):
+    """GlovePreprocessor."""
+
+    def __init__(self, config):
+        """
+        Args:
+            config (src.utils.module.Config): configuration for preprocessor
+        """
+        super(ClozePreprocessor, self).__init__()
+        self.config = config
+        self.tokenizer = configmapper.get_object(
+            "tokenizers", self.config.main.preprocessor.tokenizer.name
+        )(**self.config.main.preprocessor.tokenizer.init_params.as_dict())
+        self.tokenizer_params = (
+            self.config.main.preprocessor.tokenizer.init_vector_params.as_dict()
+        )
+
+        self.tokenizer.initialize_vectors(**self.tokenizer_params)
+
+    def preprocess(self, model_config, data_config):
+        train_dataset = configmapper.get_object("datasets", data_config.main.name)(
+            data_config.train, self.tokenizer
+        )
+        val_dataset = configmapper.get_object("datasets", data_config.main.name)(
+            data_config.val, self.tokenizer
+        )
+        model = configmapper.get_object("models", model_config.name)(
+            self.embeddings, **model_config.params.as_dict()
+        )
+
+        return model, train_dataset, val_dataset

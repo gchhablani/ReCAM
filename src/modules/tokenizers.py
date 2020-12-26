@@ -98,3 +98,9 @@ class GloveTokenizer(Tokenizer):
             print(self.text_field.preprocess(x_input))
             print(e)
         return x_output
+
+
+@configmapper.map("tokenizers", "AutoTokenizer")
+class AutoTokenizer(AutoTokenizer):
+    def __init__(self, *args):
+        super(AutoTokenizer, self).__init__()

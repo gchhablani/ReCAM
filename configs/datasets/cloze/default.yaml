@@ -1,0 +1,30 @@
+main: &main
+  name: cloze
+  data_dir: ./data/imperceptibility/
+
+  preprocessor:
+    name: glove
+    embedding:
+      name: glove
+    tokenizer:
+      name: glove
+      init_params:
+        cache: ./embeddings/
+      init_vector_params:
+        tokenizer_file_paths:
+          - ./data/Concreteness Ratings/train/forty.csv
+          - ./data/Concreteness Ratings/val/forty.csv
+        fields:
+          - Word
+
+train: &train
+  <<: *main
+  file_path: ./data/imperceptibility/train/Task_1_train.jsonl
+  split: train
+
+val:
+  <<: *main
+  file_path: ./data/imperceptibility/train/Task_1_dev.jsonl
+  split: val
+test:
+  <<: *main

@@ -26,6 +26,7 @@ class ConfigMapper:
         "params": {},
         "datasets": {},
         "preprocessors": {},
+        "tokenizers": {},
     }
 
     @classmethod

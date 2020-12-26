@@ -78,13 +78,7 @@ def generate_grid_search_configs(main_config, grid_config, root="hyperparams"):
 
         for key in parent.keys():  ## For the children
             if (
-                ".".join(
-                    stack
-                    + [
-                        key,
-                    ]
-                )
-                not in visited
+                ".".join(stack + [key,]) not in visited
             ):  ## Check if I have visited these children
                 flag = 1  ## If not, we need to repeat the process for this key
                 stack.append(key)  ## Append this key to the stack
