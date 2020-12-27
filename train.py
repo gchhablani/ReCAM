@@ -1,9 +1,10 @@
 """Train File."""
 ## Imports
 import argparse
-import itertools
-import numpy as np
+
+# import itertools
 import copy
+import numpy as np
 import torch
 import torch.nn as nn
 from src.utils.misc import seed, generate_grid_search_configs
@@ -12,6 +13,7 @@ from src.datasets.concreteness_dataset import ConcretenessDataset
 from src.trainers.forty import FortyTrainer
 from src.modules.preprocessors import *
 from src.utils.mapper import configmapper
+from src.utils.logger import Logger
 from src.models.two_layer_nn import TwoLayerNN
 
 ## Config
@@ -41,7 +43,7 @@ parser.add_argument(
     "--grid_search",
     action="store_true",
     help="Whether to do a grid_search",
-    default=False,
+    default=True,
 )
 ### Update Tips : Can provide more options to the user.
 ### Can also provide multiple verbosity levels.
@@ -56,7 +58,7 @@ grid_search = args.grid_search
 # verbose = args.verbose
 
 ## Seed
-seed(42)
+seed(train_config.main_config.seed)
 
 # Preprocessor, Dataset, Model
 preprocessor = configmapper.get_object(
@@ -69,18 +71,27 @@ if grid_search:
 
     train_configs = generate_grid_search_configs(train_config, train_config.grid_search)
     print(f"Total Configurations Generated: {len(train_configs)}")
+
+    logger = Logger(
+        **train_config.grid_search.hyperparams.train.log.logger_params.as_dict()
+    )
+
     for train_config in train_configs:
         print(train_config)
         # Trainer
-        trainer = configmapper.get_object("trainers", train_config.name)(train_config)
+        trainer = configmapper.get_object("trainers", train_config.trainer_name)(
+            train_config
+        )
 
         ## Train
-        trainer.train(model, train_data, val_data)
+        trainer.train(model, train_data, val_data, logger)
 
 else:
 
     ## Trainer
-    trainer = configmapper.get_object("trainers", train_config.name)(train_config)
+    trainer = configmapper.get_object("trainers", train_config.trainer_name)(
+        train_config
+    )
 
     ## Train
     trainer.train(model, train_data, val_data)

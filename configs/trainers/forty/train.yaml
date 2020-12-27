@@ -1,4 +1,4 @@
-name: forty
+trainer_name: forty
 version: 1.0
 main_config: &main
     seed: !!int 42
@@ -31,7 +31,7 @@ train: &train
         type: mse
         params: null
 
-    save_on : ##Best Model Saving
+    save_on : ##Best Model/Final Model Saving
       score: mse
       desired: min
       best_path: './ckpts/forty/train/best_{}.pth'
@@ -80,26 +80,93 @@ grid_search:
   directory: null
   hyperparams:
     train:
-      max_epochs: !!int 2
+      max_epochs: !!int 10
       loader_params:
         batch_size:
           - !!int 32
           - !!int 64
-      # optimizer:
-      #   # type:
-      #   #   - adam_w
-      #   #   - adam
-      #   params:
-      #     lr:
-      #       - !!float 1e-5
-      #       - !!float 1e-6
-          #   - !!float 1e-7
-          # betas:
-          #   - [0.9,0.998]
-          #   - [0.9,0.999]
-          #   - [0.95,0.998]
+          - !!int 128
+      optimizer:
+        type:
+          - adam_w
+          - adam
+        params:
+          lr:
+            - !!float 1e-4
+            - !!float 1e-5
+            - !!float 1e-6
+          weight_decay:
+            - 0
+            - 0.01
+        # - type: adam_w
+        #   params:
+        #     lr: !!float 1e-5
+        #     betas: [0.9,0.998]
+        #     eps: !!float 1e-8
+        #
+        # - type: adam_w
+        #   params:
+        #     lr: !!float 1e-6
+        #     betas: [0.9,0.998]
+        #     eps: !!float 1e-7
+        #
+        # - type: sgd
+        #   params:
+        #     lr: !!float 1e-6
+        #     momentum: 0.9
+        # params:
+        #   lr:
+        #     - !!float 1e-5
+        #     - !!float 1e-6
+        #     - !!float 1e-7
+        #   betas:
+        #     - [0.9,0.998]
+        #     - [0.9,0.999]
+        #     - [0.95,0.998]
+
+      scheduler:
+          - null
+          # - type: step
+          #   params:
+          #     step_size: !!int 100
+          #     gamma: 0.1
+          #
+          # - type: cosineanneal
+          #   params:
+          #     T_0: !!int 100
+          #     T_mult: !!int 2
+          #     eta_min: !!float 1e-9
+
+
+
+          - type: reduceplateau
+            params:
+              mode: min
+              factor: !!float 0.1
+              patience: !!float 3
+
+          - type: cyclic
+            params:
+              base_lr: !!float 1e-7
+              max_lr: !!float 1e-3
+              step_size_up: !!int 100
+              step_size_down: !!int 200
+              mode: exp_range
+
+
+          - type: cosineannealrestart
+            params:
+              T_0: !!int 100
+              T_mult: !!int 2
+              eta_min: !!float 1e-9
+
+
+
       log:
         logger_params:
+          model: two_layer_nn
+          trainer: forty
+          comment: "GridSearch for Forty"
           log_dir: './logs/gridsearch'
         log_label: null
         values:
@@ -109,9 +176,23 @@ grid_search:
                   - train
                   - loader_params
                   - batch_size
-             - name: learning_rate
+             - name: optimizer_params
                path:
                  - train
                  - optimizer
                  - params
-                 - lr
+             # - name: learning_rate
+             #   path:
+             #     - train
+             #     - optimizer
+             #     - params
+             #     - lr
+             - name: optimizer_type
+               path:
+                 - train
+                 - optimizer
+                 - type
+             - name: scheduler
+               path:
+                 - train
+                 - scheduler

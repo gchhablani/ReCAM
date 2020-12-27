@@ -59,7 +59,7 @@ class ClozeDataset(Dataset):
 
     def _preprocess(self, data):
         """
-            Helper Function To preprocess each datapoint before __get_item__ for jsonl files
+        Helper Function To preprocess each datapoint before __get_item__ for jsonl files
         """
         article = (
             data["article"].lower()
@@ -101,12 +101,12 @@ class ClozeDataset(Dataset):
 
     def __getitem__(self, idx):
         """
-            Gets processed text, masks, options and answers at a particular index
-            Args:
-                idx (int): The index of the record to be fetched.
-            Returns:
-                sample(List) -> article,article_masks,options,answer_index,answer
-            (all with tokenized input ids)
+        Gets processed text, masks, options and answers at a particular index
+        Args:
+            idx (int): The index of the record to be fetched.
+        Returns:
+            sample(List) -> article,article_masks,options,answer_index,answer
+        (all with tokenized input ids)
         """
 
         sample = []

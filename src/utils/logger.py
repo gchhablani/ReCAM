@@ -1,4 +1,5 @@
 import os
+import json
 import torch
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
@@ -84,9 +85,16 @@ class Logger:
     def save_hyperparams(
         self, hparam_list, hparam_name_list, metric_list, metric_name_list
     ):
-        print(hparam_list, hparam_name_list,metric_list,metric_name_list)
+        print(hparam_list, hparam_name_list, metric_list, metric_name_list)
+        for i in range(len(hparam_list)):
+            if isinstance(hparam_list[i], list):
+                hparam_list[i] = ",".join(list(map(str, hparam_list[i])))
+            if isinstance(hparam_list[i], dict):
+                hparam_list[i] = json.dumps(hparam_list[i])
+
         self.writer.add_hparams(
-             dict(zip(hparam_name_list, hparam_list)),dict(zip(metric_name_list, metric_list))
+            dict(zip(hparam_name_list, hparam_list)),
+            dict(zip(metric_name_list, metric_list)),
         )
 
     def save_models(self, model_list, model_names_list, epoch):
