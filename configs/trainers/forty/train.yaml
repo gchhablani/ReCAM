@@ -5,7 +5,7 @@ main_config: &main
     metrics:
         - sklearn_mse
     device:
-        name: 'cuda:0'
+        name: 'cpu'
 
 train: &train
     # Change to different value if not using max_steps
@@ -85,7 +85,7 @@ grid_search:
         batch_size:
           - !!int 32
           - !!int 64
-          - !!int 128
+          # - !!int 128
       optimizer:
         type:
           - adam_w
@@ -94,10 +94,10 @@ grid_search:
           lr:
             - !!float 1e-4
             - !!float 1e-5
-            - !!float 1e-6
-          weight_decay:
-            - 0
-            - 0.01
+            # - !!float 1e-6
+          # weight_decay:
+          #   - 0
+          #   - 0.01
         # - type: adam_w
         #   params:
         #     lr: !!float 1e-5

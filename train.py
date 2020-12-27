@@ -16,6 +16,10 @@ from src.utils.mapper import configmapper
 from src.utils.logger import Logger
 from src.models.two_layer_nn import TwoLayerNN
 
+
+import os
+dirname = os.path.dirname(__file__) ## For Paths Relative to Current File
+
 ## Config
 parser = argparse.ArgumentParser(prog="train.py", description="Train a model.")
 parser.add_argument(
@@ -23,27 +27,27 @@ parser.add_argument(
     type=str,
     action="store",
     help="The configuration for model",
-    default="./configs/models/forty/default.yaml",
+    default=os.path.join(dirname,"./configs/models/forty/default.yaml")
 )
 parser.add_argument(
     "--train",
     type=str,
     action="store",
     help="The configuration for model training/evaluation",
-    default="./configs/trainers/forty/train.yaml",
+    default=os.path.join(dirname,"./configs/trainers/forty/train.yaml")
 )
 parser.add_argument(
     "--data",
     type=str,
     action="store",
     help="The configuration for data",
-    default="./configs/datasets/forty/default.yaml",
+    default=os.path.join(dirname,"./configs/datasets/forty/default.yaml")
 )
 parser.add_argument(
     "--grid_search",
     action="store_true",
     help="Whether to do a grid_search",
-    default=True,
+    default= True
 )
 ### Update Tips : Can provide more options to the user.
 ### Can also provide multiple verbosity levels.

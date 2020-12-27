@@ -223,17 +223,20 @@ class FortyTrainer:
                         global_step,
                         append_text=self.train_config.append_text,
                     )
-
+                pbar.close()
+                
             if not os.path.exists(self.train_config.checkpoint.checkpoint_dir):
                 os.makedirs(self.train_config.checkpoint.checkpoint_dir)
 
-            torch.save(
-                model.state_dict(),
-                f"{self.train_config.checkpoint.checkpoint_dir}_{str(self.train_config.log.log_label)}"
-                + "_"
-                + str(epoch)
-                + ".pth",
-            )
+
+            store_dict = {
+                "model_state_dict": model.state_dict(),
+            }
+
+            path =f"{self.train_config.checkpoint.checkpoint_dir}_{str(self.train_config.log.log_label)}_{str(epoch)}.pth"
+
+            self.save(store_dict, path, save_flag=1)
+
         if epoch == max_epochs:
             print("\nEvaluating\n")
             val_scores = self.val(
@@ -411,6 +414,9 @@ class FortyTrainer:
 
     def save(self, store_dict, path, save_flag=0):
         if save_flag:
+            dirs = '/'.join(path.split('/')[:-1])
+            if(not os.path.exists(dirs)):
+                os.makedirs(dirs)
             torch.save(store_dict, path)
 
     def log(
