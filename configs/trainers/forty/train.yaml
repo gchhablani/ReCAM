@@ -5,7 +5,7 @@ main_config: &main
     metrics:
         - sklearn_mse
     device:
-        name: 'cpu'
+        name: 'cuda:0'
 
 train: &train
     # Change to different value if not using max_steps
@@ -41,7 +41,7 @@ train: &train
     checkpoint:
         checkpoint_dir: './ckpts/forty/'
 
-    log_and_val_interval: !!int 500 # Set to null if using different val and log intervals, Overrides log_interval nd val_interval
+    log_and_val_interval: !!int 100 # Set to null if using different val and log intervals, Overrides log_interval nd val_interval
 
     val_interval: !!int 100 # Global steps
     log:
@@ -80,24 +80,24 @@ grid_search:
   directory: null
   hyperparams:
     train:
-      max_epochs: !!int 1
-      # loader_params:
-      #   batch_size:
-      #     - !!int 32
-      #     - !!int 64
-      #     - !!int 128
-      # optimizer:
-      #   type:
-      #     - adam_w
-      #     - adam
-      #   params:
-      #     lr:
-      #       - !!float 1e-4
-      #       - !!float 1e-5
-      #       - !!float 1e-6
-      #     weight_decay:
-      #       - 0
-      #       - 0.01
+      max_epochs: !!int 10
+      loader_params:
+        batch_size:
+          - !!int 32
+          - !!int 64
+          - !!int 128
+      optimizer:
+        type:
+          - adam_w
+          - adam
+        params:
+          lr:
+            - !!float 1e-4
+            - !!float 1e-5
+            - !!float 1e-6
+          weight_decay:
+            - 0
+            - 0.01
         # - type: adam_w
         #   params:
         #     lr: !!float 1e-5
@@ -126,17 +126,15 @@ grid_search:
 
       scheduler:
           - null
-          - type: step
-            params:
-              step_size: !!int 100
-              gamma: 0.1
+          # - type: step
+          #   params:
+          #     step_size: !!int 100
+          #     gamma: 0.1
 
-          - type: cosineanneal
-            params:
-              T_max: !!int 100
-              eta_min: !!float 1e-9
-
-
+          # - type: cosineanneal
+          #   params:
+          #     T_max: !!int 100
+          #     eta_min: !!float 1e-9
 
           - type: reduceplateau
             params:
