@@ -224,7 +224,7 @@ class FortyTrainer:
                         append_text=self.train_config.append_text,
                     )
                 pbar.close()
-                
+
             if not os.path.exists(self.train_config.checkpoint.checkpoint_dir):
                 os.makedirs(self.train_config.checkpoint.checkpoint_dir)
 
