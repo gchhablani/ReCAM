@@ -136,7 +136,10 @@ class FortyTrainer:
                 optimizer.step()
 
                 if self.train_config.scheduler is not None:
-                    scheduler.step(epoch + step / len(train_loader))
+                    if(isinstance(scheduler, ReduceLROnPlateau)):
+                        scheduler.step(train_loss/(global_step+1))
+                    else:
+                        scheduler.step()
 
                 # print(train_loss)
                 # print(step+1)

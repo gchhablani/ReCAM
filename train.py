@@ -65,10 +65,8 @@ preprocessor = configmapper.get_object(
     "preprocessors", data_config.main.preprocessor.name
 )(data_config)
 
-model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
 if grid_search:
-
     train_configs = generate_grid_search_configs(train_config, train_config.grid_search)
     print(f"Total Configurations Generated: {len(train_configs)}")
 
@@ -78,6 +76,8 @@ if grid_search:
 
     for train_config in train_configs:
         print(train_config)
+
+        model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
         # Trainer
         trainer = configmapper.get_object("trainers", train_config.trainer_name)(
             train_config
@@ -87,6 +87,7 @@ if grid_search:
         trainer.train(model, train_data, val_data, logger)
 
 else:
+    model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
     ## Trainer
     trainer = configmapper.get_object("trainers", train_config.trainer_name)(

@@ -41,9 +41,13 @@ def get_item_in_config(config, path):
     if isinstance(config, dict):
         for step in path:
             curr = curr[step]
+            if curr is None:
+                break
     else:
         for step in path:
             curr = curr.__getattr__(step)
+            if curr is None:
+                break
     return curr
 
 

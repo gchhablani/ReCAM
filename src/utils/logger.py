@@ -3,8 +3,8 @@ import json
 import torch
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
-from torchvision.utils import make_grid
-from torchviz import make_dot
+# from torchvision.utils import make_grid
+# from torchviz import make_dot
 
 
 class Logger:
@@ -19,9 +19,9 @@ class Logger:
         self.writer = SummaryWriter(log_dir=self.model_path, comment=comment)
         try:
             if not os.path.exists(log_dir):
-                os.makedir(log_dir)
+                os.makedirs(log_dir)
             if not (os.path.exists(self.model_path)):
-                os.makedir(self.model_path)
+                os.makedirs(self.model_path)
             else:
                 pass
                 # print("Directory Already Exists.")
@@ -85,13 +85,15 @@ class Logger:
     def save_hyperparams(
         self, hparam_list, hparam_name_list, metric_list, metric_name_list
     ):
-        print(hparam_list, hparam_name_list, metric_list, metric_name_list)
+
         for i in range(len(hparam_list)):
             if isinstance(hparam_list[i], list):
                 hparam_list[i] = ",".join(list(map(str, hparam_list[i])))
             if isinstance(hparam_list[i], dict):
                 hparam_list[i] = json.dumps(hparam_list[i])
-
+            if (hparam_list[i] is None):
+                hparam_list[i] = 'None'
+        print(hparam_list, hparam_name_list, metric_list, metric_name_list)
         self.writer.add_hparams(
             dict(zip(hparam_name_list, hparam_list)),
             dict(zip(metric_name_list, metric_list)),
@@ -106,20 +108,20 @@ class Logger:
             fig_name, fig, Logger._global_step(epoch, batch_size, batch)
         )
 
-    def display_params(
-        params_list, params_name_list, epoch, num_epochs, batch_size, batch
-    ):
-        for i in range(len(params_list)):
-            if isinstance(params_list[i], Variable):
-                params_list[i] = params_list[i].data.cpu().numpy()
-        print("Epoch: {}/{}, Batch: {}/{}".format(epoch, num_epochs, batch, batch_size))
-        for i in range(len(params_list)):
-            print("{}:{}".format(params_name_list[i], params_list[i]))
-
-    def draw_model_architecture(model, output, input, input_name, save_name):
-        make_dot(
-            output, params=dict(list(model.named_parameters())) + [(input_name, input)]
-        )
+    # def display_params(self,
+    #     params_list, params_name_list, epoch, num_epochs, batch_size, batch
+    # ):
+    #     for i in range(len(params_list)):
+    #         if isinstance(params_list[i], Variable):
+    #             params_list[i] = params_list[i].data.cpu().numpy()
+    #     print("Epoch: {}/{}, Batch: {}/{}".format(epoch, num_epochs, batch, batch_size))
+    #     for i in range(len(params_list)):
+    #         print("{}:{}".format(params_name_list[i], params_list[i]))
+    #
+    # def draw_model_architecture(self,model, output, input, input_name, save_name):
+    #     make_dot(
+    #         output, params=dict(list(model.named_parameters())) + [(input_name, input)]
+    #     )
 
     def close(self):
         self.writer.close()
