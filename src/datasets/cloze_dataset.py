@@ -32,24 +32,29 @@ class ClozeDataset(Dataset):
         self.config = config
         self.tokenizer = tokenizer
 
-        if hasattr(self.config, "preprocessed"):
+        try:
             if self.config.preprocessed == True:
                 self.data = torch.load(self.config.file_path)
-        else:
+        except KeyError:
             self.config.preprocessed = False
             with open(self.config.file_path) as f:
                 self.data = [
                     json.loads(datapoint) for datapoint in f.read().splitlines()
                 ]
 
-        self.mask_id = tokenizer.convert_tokens_to_ids("[MASK]")
-        self.pad_id = tok.convert_tokens_to_ids("[PAD]")
+        self.mask_id = self.tokenizer.convert_tokens_to_ids("[MASK]")
+        self.pad_id = self.tokenizer.convert_tokens_to_ids("[PAD]")
         # Check if truncate is true but truncate length has not been mentioned
-        if hasattr(self.config, "truncate"):
-            if not hasattr(self.config, "truncate_length"):
-                # Default value 512
-                self.config.truncate_length = 512
-        else:
+        try:
+            if self.config.truncate:
+                try:
+                    #Check to see if truncate_length exists
+                    if self.config.truncate_length:
+                        pass
+                except KeyError:
+                    # Default value 512
+                    self.config.truncate_length = 512
+        except KeyError:
             # Make False if Truncate does not Exist
             self.config.truncate = False
 

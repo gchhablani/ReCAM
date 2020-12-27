@@ -59,14 +59,7 @@ class ClozePreprocessor(Preprocessor):
         """
         super(ClozePreprocessor, self).__init__()
         self.config = config
-        self.tokenizer = configmapper.get_object(
-            "tokenizers", self.config.main.preprocessor.tokenizer.name
-        )(**self.config.main.preprocessor.tokenizer.init_params.as_dict())
-        self.tokenizer_params = (
-            self.config.main.preprocessor.tokenizer.init_vector_params.as_dict()
-        )
-
-        self.tokenizer.initialize_vectors(**self.tokenizer_params)
+        self.tokenizer = configmapper.get_object("tokenizers", self.config.main.preprocessor.tokenizer.name).from_pretrained(**self.config.main.preprocessor.tokenizer.init_params.as_dict())
 
     def preprocess(self, model_config, data_config):
         train_dataset = configmapper.get_object("datasets", data_config.main.name)(
@@ -75,8 +68,6 @@ class ClozePreprocessor(Preprocessor):
         val_dataset = configmapper.get_object("datasets", data_config.main.name)(
             data_config.val, self.tokenizer
         )
-        model = configmapper.get_object("models", model_config.name)(
-            **model_config.params.as_dict()
-        )
+        model = configmapper.get_object("models", model_config.name).from_pretrained(model_config.name)
 
         return model, train_dataset, val_dataset

@@ -1,5 +1,5 @@
 """Implements Bert Cloze Style Question Answering"""
-
+import torch
 import torch.nn as nn
 from src.utils.mapper import configmapper
 from transformers import BertModel, BertPreTrainedModel
@@ -96,8 +96,8 @@ class BertForCloze(BertPreTrainedModel):
 
     def __init__(self, config):
 
-        super(BertForCloth, self).__init__(config)
-        self.bert = bert_model_embedding_weights(config)
+        super(BertForCloze, self).__init__(config)
+        self.bert = BertModel(config)
         self.cls = BertOnlyMLMHead(config, self.bert.embeddings.word_embeddings.weight)
         self.init_weights(self.cls)
         self.vocab_size = self.bert.embeddings.word_embeddings.weight.size(0)
