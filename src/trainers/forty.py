@@ -99,7 +99,7 @@ class FortyTrainer:
         best_metrics_list = None
         best_metrics_name_list = None
 
-        print("\nTraining\n")
+        # print("\nTraining\n")
         # print(max_steps)
 
         global_step = 0
@@ -137,7 +137,7 @@ class FortyTrainer:
 
                 if self.train_config.scheduler is not None:
                     if(isinstance(scheduler, ReduceLROnPlateau)):
-                        scheduler.step(train_loss/(global_step+1))
+                        scheduler.step(train_loss/(step+1))
                     else:
                         scheduler.step()
 
@@ -152,7 +152,7 @@ class FortyTrainer:
                 # Need to check if we want global_step or local_step
 
                 if val_dataset is not None and (global_step - 1) % val_interval == 0:
-                    print("\nEvaluating\n")
+                    # print("\nEvaluating\n")
                     val_scores = self.val(
                         model,
                         val_dataset,
@@ -201,12 +201,12 @@ class FortyTrainer:
                             ) = self.update_hparams(
                                 train_scores, val_scores, desc="best_val"
                             )
-
+                # pbar.close()
                 if (global_step - 1) % log_interval == 0:
-                    print("\nLogging\n")
+                    # print("\nLogging\n")
                     train_loss_name = self.train_config.criterion.type
                     metric_list = [
-                        metric(outputs.detach().cpu(), labels.cpu())
+                        metric(all_outputs.detach().cpu(), all_labels.cpu())
                         for metric in self.metrics
                     ]
                     metric_name_list = [
@@ -214,7 +214,7 @@ class FortyTrainer:
                     ]
 
                     train_scores = self.log(
-                        train_loss / global_step,
+                        train_loss / (step+1),
                         train_loss_name,
                         metric_list,
                         metric_name_list,
@@ -223,7 +223,7 @@ class FortyTrainer:
                         global_step,
                         append_text=self.train_config.append_text,
                     )
-                pbar.close()
+
 
             if not os.path.exists(self.train_config.checkpoint.checkpoint_dir):
                 os.makedirs(self.train_config.checkpoint.checkpoint_dir)
@@ -238,7 +238,7 @@ class FortyTrainer:
                 self.save(store_dict, path, save_flag=1)
 
         if epoch == max_epochs:
-            print("\nEvaluating\n")
+            # print("\nEvaluating\n")
             val_scores = self.val(
                 model,
                 val_dataset,
@@ -249,15 +249,15 @@ class FortyTrainer:
                 train_log_values,
             )
 
-            print("\nLogging\n")
+            # print("\nLogging\n")
             train_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(outputs.detach().cpu(), labels.cpu()) for metric in self.metrics
+                metric(all_outputs.detach().cpu(), all_labels.cpu()) for metric in self.metrics
             ]
             metric_name_list = [metric for metric in self._config.main_config.metrics]
 
             train_scores = self.log(
-                train_loss / global_step,
+                train_loss / len(train_loader),
                 train_loss_name,
                 metric_list,
                 metric_name_list,
@@ -273,7 +273,7 @@ class FortyTrainer:
 
                 train_scores = self.get_scores(
                     train_loss,
-                    global_step,
+                    len(train_loader),
                     self.train_config.criterion.type,
                     all_outputs,
                     all_labels,
@@ -305,7 +305,7 @@ class FortyTrainer:
                 ## FINAL SCORES UPDATING + STORING
                 train_scores = self.get_scores(
                     train_loss,
-                    global_step,
+                    len(train_loader),
                     self.train_config.criterion.type,
                     all_outputs,
                     all_labels,
@@ -520,7 +520,7 @@ class FortyTrainer:
 
             val_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(outputs.detach().cpu(), labels.cpu()) for metric in self.metrics
+                metric(all_outputs.detach().cpu(), all_labels.cpu()) for metric in self.metrics
             ]
             metric_name_list = [metric for metric in self._config.main_config.metrics]
             return_dic = dict(
@@ -530,7 +530,7 @@ class FortyTrainer:
                     ]
                     + metric_name_list,
                     [
-                        loss,
+                        val_loss,
                     ]
                     + metric_list,
                 )
@@ -546,4 +546,5 @@ class FortyTrainer:
                     global_step,
                     append_text,
                 )
+                return val_scores
             return return_dic

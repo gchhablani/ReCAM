@@ -47,7 +47,7 @@ parser.add_argument(
     "--grid_search",
     action="store_true",
     help="Whether to do a grid_search",
-    default= True
+    default= False
 )
 ### Update Tips : Can provide more options to the user.
 ### Can also provide multiple verbosity levels.
