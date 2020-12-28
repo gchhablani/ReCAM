@@ -6,13 +6,16 @@ import numpy as np
 import copy
 import torch
 import torch.nn as nn
+
 from src.utils.misc import seed, generate_grid_search_configs
 from src.utils.configuration import Config
-from src.datasets.concreteness_dataset import ConcretenessDataset
-from src.trainers.forty import FortyTrainer
+
+from src.datasets import *
+from src.models import *
+from src.trainers import *
+
 from src.modules.preprocessors import *
 from src.utils.mapper import configmapper
-from src.models.two_layer_nn import TwoLayerNN
 
 ## Config
 parser = argparse.ArgumentParser(prog="train.py", description="Train a model.")
