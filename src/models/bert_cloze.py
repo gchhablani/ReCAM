@@ -1,5 +1,6 @@
 """Implements Bert Cloze Style Question Answering"""
 import torch
+import math
 import torch.nn as nn
 from src.utils.mapper import configmapper
 from transformers import BertModel, BertPreTrainedModel
@@ -126,14 +127,15 @@ class BertForCloze(BertPreTrainedModel):
                 x_output (torch.Tensor): The output regression scores for each option
         """
         articles, articles_mask, ops, question_pos = x_input
-
         bsz = ops.size(0)
+        ops = ops.reshape(bsz, 1, -1, 1)
+
         opnum = ops.size(1)
         out = self.bert(
             articles, attention_mask=articles_mask, output_hidden_states=False
         ).last_hidden_state
 
-        question_pos = question_pos.unsqueeze(-1)
+        question_pos = question_pos.reshape(-1, 1, 1)
         question_pos = question_pos.expand(bsz, opnum, out.size(-1))
         out = torch.gather(out, 1, question_pos)
         out = self.cls(out)
@@ -145,4 +147,4 @@ class BertForCloze(BertPreTrainedModel):
 
         out = out.view(-1, 5)
 
-        return output
+        return out

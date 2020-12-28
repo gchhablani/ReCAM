@@ -48,7 +48,7 @@ class ClozeDataset(Dataset):
         try:
             if self.config.truncate:
                 try:
-                    #Check to see if truncate_length exists
+                    # Check to see if truncate_length exists
                     if self.config.truncate_length:
                         pass
                 except KeyError:
@@ -88,7 +88,10 @@ class ClozeDataset(Dataset):
         options_tokenized = []
         for i in range(5):
             option = self.tokenizer(
-                options[i], return_token_type_ids=False, return_attention_mask=False,add_special_tokens = False
+                options[i],
+                return_token_type_ids=False,
+                return_attention_mask=False,
+                add_special_tokens=False,
             )
             options_tokenized.append(option)
 
