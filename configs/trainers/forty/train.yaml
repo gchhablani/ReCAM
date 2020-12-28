@@ -37,6 +37,8 @@ train: &train
       best_path: './ckpts/forty/train/best_{}.pth'
       final_path: './ckpts/forty/train/final_{}.pth'
 
+    save_after_epoch: false
+
 
     checkpoint:
         checkpoint_dir: './ckpts/forty/'

@@ -228,14 +228,14 @@ class FortyTrainer:
             if not os.path.exists(self.train_config.checkpoint.checkpoint_dir):
                 os.makedirs(self.train_config.checkpoint.checkpoint_dir)
 
+            if self.train_config.save_after_epoch:
+                store_dict = {
+                    "model_state_dict": model.state_dict(),
+                }
 
-            store_dict = {
-                "model_state_dict": model.state_dict(),
-            }
+                path =f"{self.train_config.checkpoint.checkpoint_dir}_{str(self.train_config.log.log_label)}_{str(epoch)}.pth"
 
-            path =f"{self.train_config.checkpoint.checkpoint_dir}_{str(self.train_config.log.log_label)}_{str(epoch)}.pth"
-
-            self.save(store_dict, path, save_flag=1)
+                self.save(store_dict, path, save_flag=1)
 
         if epoch == max_epochs:
             print("\nEvaluating\n")
