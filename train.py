@@ -61,9 +61,6 @@ grid_search = args.grid_search
 
 # verbose = args.verbose
 
-## Seed
-seed(train_config.main_config.seed)
-
 # Preprocessor, Dataset, Model
 preprocessor = configmapper.get_object(
     "preprocessors", data_config.main.preprocessor.name
@@ -74,12 +71,16 @@ if grid_search:
     train_configs = generate_grid_search_configs(train_config, train_config.grid_search)
     print(f"Total Configurations Generated: {len(train_configs)}")
 
+
     logger = Logger(
         **train_config.grid_search.hyperparams.train.log.logger_params.as_dict()
     )
 
     for train_config in train_configs:
         print(train_config)
+
+        ## Seed
+        seed(train_config.main_config.seed)
 
         model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
         # Trainer
@@ -91,6 +92,9 @@ if grid_search:
         trainer.train(model, train_data, val_data, logger)
 
 else:
+    ## Seed
+    seed(train_config.main_config.seed)
+
     model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
     ## Trainer
