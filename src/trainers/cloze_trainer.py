@@ -230,6 +230,7 @@ class ClozeTrainer:
 
                 if (global_step - 1) % log_interval == 0:
                     print("\nLogging\n")
+
                     train_loss_name = self.train_config.criterion.type
                     metric_list = [
                         metric(outputs.detach().cpu(), labels.cpu())

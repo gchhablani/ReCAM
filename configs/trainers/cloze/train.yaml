@@ -1,4 +1,4 @@
-trainer_name: cloze
+name: cloze
 version: 1.0
 main_config: &main
     seed: !!int 42
