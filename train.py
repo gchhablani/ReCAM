@@ -7,14 +7,23 @@ import copy
 import numpy as np
 import torch
 import torch.nn as nn
+
 from src.utils.misc import seed, generate_grid_search_configs
 from src.utils.configuration import Config
-from src.datasets.concreteness_dataset import ConcretenessDataset
-from src.trainers.forty import FortyTrainer
+
+from src.datasets import *
+from src.models import *
+from src.trainers import *
+
 from src.modules.preprocessors import *
 from src.utils.mapper import configmapper
+<<<<<<< HEAD
+||||||| 55d759a
+from src.models.two_layer_nn import TwoLayerNN
+=======
 from src.utils.logger import Logger
 from src.models.two_layer_nn import TwoLayerNN
+>>>>>>> upstream/main
 
 
 import os

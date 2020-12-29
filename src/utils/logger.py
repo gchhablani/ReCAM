@@ -85,6 +85,11 @@ class Logger:
     def save_hyperparams(
         self, hparam_list, hparam_name_list, metric_list, metric_name_list
     ):
+<<<<<<< HEAD
+        print(hparam_list, hparam_name_list, metric_list, metric_name_list)
+||||||| 55d759a
+        print(hparam_list, hparam_name_list,metric_list,metric_name_list)
+=======
 
         for i in range(len(hparam_list)):
             if isinstance(hparam_list[i], list):
@@ -94,6 +99,7 @@ class Logger:
             if (hparam_list[i] is None):
                 hparam_list[i] = 'None'
         print(hparam_list, hparam_name_list, metric_list, metric_name_list)
+>>>>>>> upstream/main
         self.writer.add_hparams(
             dict(zip(hparam_name_list, hparam_list)),
             dict(zip(metric_name_list, metric_list)),

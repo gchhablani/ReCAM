@@ -95,6 +95,13 @@ def generate_grid_search_configs(main_config, grid_config, root="hyperparams"):
                 stack.pop()
                 continue
 
+<<<<<<< HEAD
+            if "log_label" in root.keys():
+                log_label_path = copy.deepcopy(stack + ["log_label",])
+||||||| 55d759a
+            if('log_label' in root.keys()):
+                log_label_path = copy.deepcopy(stack+['log_label',])
+=======
             if "log_label" in root.keys():
                 log_label_path = copy.deepcopy(
                     stack
@@ -102,6 +109,7 @@ def generate_grid_search_configs(main_config, grid_config, root="hyperparams"):
                         "log_label",
                     ]
                 )
+>>>>>>> upstream/main
             parent = root  ## Otherwise it has children
 
         for key in parent.keys():  ## For the children
