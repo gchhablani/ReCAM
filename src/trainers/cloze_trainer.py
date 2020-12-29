@@ -20,10 +20,11 @@ from tqdm import tqdm
 class ClozeTrainer:
     def __init__(self, config):
         self._config = config
-        self.metrics = [
-            configmapper.get_object("metrics", metric)
+        self.metrics = {
+            configmapper.get_object("metrics", metric["type"]): metric["params"]
             for metric in self._config.main_config.metrics
-        ]
+        }
+
         self.train_config = self._config.train
         self.val_config = self._config.val
         self.log_label = self.train_config.log.log_label
@@ -163,7 +164,8 @@ class ClozeTrainer:
                             for metric in self.metrics
                         ]
                         metric_name_list = [
-                            metric for metric in self._config.main_config.metrics
+                            metric["type"]
+                            for metric in self._config.main_config.metrics
                         ]
 
                         train_scores = dict(
@@ -232,14 +234,16 @@ class ClozeTrainer:
                     print("\nLogging\n")
 
                     train_loss_name = self.train_config.criterion.type
+                    outputs = torch.argmax(outputs, axis=1)
                     metric_list = [
-                        metric(outputs.detach().cpu(), labels.cpu())
+                        metric(
+                            outputs.detach().cpu(), labels.cpu(), **self.metrics[metric]
+                        )
                         for metric in self.metrics
                     ]
                     metric_name_list = [
-                        metric for metric in self._config.main_config.metrics
+                        metric["type"] for metric in self._config.main_config.metrics
                     ]
-
                     train_scores = self.log(
                         train_loss / global_step,
                         train_loss_name,
@@ -279,11 +283,13 @@ class ClozeTrainer:
                     training_loss = train_loss / global_step
 
                     metric_list = [
-                        metric(all_outputs.detach().cpu(), all_labels.cpu())
+                        metric(
+                            outputs.detach().cpu(), labels.cpu(), **self.metrics[metric]
+                        )
                         for metric in self.metrics
                     ]
                     metric_name_list = [
-                        metric for metric in self._config.main_config.metrics
+                        metric["type"] for metric in self._config.main_config.metrics
                     ]
 
                     train_scores = dict(
@@ -347,11 +353,13 @@ class ClozeTrainer:
                     training_loss = train_loss / global_step
 
                     metric_list = [
-                        metric(all_outputs.detach().cpu(), all_labels.cpu())
+                        metric(
+                            outputs.detach().cpu(), labels.cpu(), **self.metrics[metric]
+                        )
                         for metric in self.metrics
                     ]
                     metric_name_list = [
-                        metric for metric in self._config.main_config.metrics
+                        metric["type"] for metric in self._config.main_config.metrics
                     ]
 
                     train_scores = dict(
@@ -400,11 +408,11 @@ class ClozeTrainer:
                 print("\nLogging\n")
                 train_loss_name = self.train_config.criterion.type
                 metric_list = [
-                    metric(outputs.detach().cpu(), labels.cpu())
+                    metric(outputs.detach().cpu(), labels.cpu(), **self.metrics[metric])
                     for metric in self.metrics
                 ]
                 metric_name_list = [
-                    metric for metric in self._config.main_config.metrics
+                    metric["type"] for metric in self._config.main_config.metrics
                 ]
 
                 train_scores = self.log(
@@ -517,9 +525,12 @@ class ClozeTrainer:
 
             val_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(outputs.detach().cpu(), labels.cpu()) for metric in self.metrics
+                metric(outputs.detach().cpu(), labels.cpu(), **self.metrics[metric])
+                for metric in self.metrics
             ]
-            metric_name_list = [metric for metric in self._config.main_config.metrics]
+            metric_name_list = [
+                metric["type"] for metric in self._config.main_config.metrics
+            ]
             return_dic = dict(
                 zip([val_loss_name,] + metric_name_list, [loss,] + metric_list)
             )

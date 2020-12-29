@@ -3,11 +3,27 @@ version: 1.0
 main_config: &main
     seed: !!int 42
     metrics:
-        - sklearn_f1
-        - sklearn_p
-        - sklearn_r
-        - sklearn_roc
-        - sklearn_acc
+
+      - type: sklearn_f1
+        params:
+          average: macro
+
+      - type: sklearn_p
+        params:
+          average: macro
+
+      - type: sklearn_r
+        params:
+          average: macro
+
+      - type: sklearn_roc
+        params:
+          average: macro
+
+      - type: sklearn_acc
+        params: 
+            normalize: True
+
     device:
         name: 'cpu'
 
@@ -38,12 +54,12 @@ train: &train
     save_on : ##Best Model/Final Model Saving
       score: mse
       desired: min
-      best_path: './ckpts/forty/train/best_{}.pth'
-      final_path: './ckpts/forty/train/final_{}.pth'
+      best_path: './ckpts/cloze/train/best_{}.pth'
+      final_path: './ckpts/cloze/train/final_{}.pth'
 
 
     checkpoint:
-        checkpoint_dir: './ckpts/forty/'
+        checkpoint_dir: './ckpts/cloze/'
 
     log_and_val_interval: !!int 100 ## Set to null if using different val and log intervals, Overrides log_interval nd val_interval
 
@@ -51,10 +67,10 @@ train: &train
     log:
         log_interval: !!int 100 # Global Steps
         logger_params:
-            model: two_layer_nn
-            trainer: forty
+            model: cloze
+            trainer: cloze
             comment: "Trial for Logger and Trainer"
-            log_dir: './logs/forty/train'
+            log_dir: './logs/cloze/train'
         log_label: 1
         values:
             loss: true
@@ -72,9 +88,9 @@ val:
     # log:
     #     logger_params:
     #         model: two_layer_nn
-    #         trainer: forty
+    #         trainer: cloze
     #         comment: "Trial for Logger and Trainer"
-    #         log_dir: './logs/forty/eval'
+    #         log_dir: './logs/cloze/eval'
     #     log_label: 1
     #     values:
     #         loss: true
@@ -168,9 +184,9 @@ grid_search:
 
       log:
         logger_params:
-          model: two_layer_nn
-          trainer: forty
-          comment: "GridSearch for Forty"
+          model: cloze
+          trainer: cloze
+          comment: "GridSearch for cloze"
           log_dir: './logs/gridsearch'
         log_label: null
         values:
