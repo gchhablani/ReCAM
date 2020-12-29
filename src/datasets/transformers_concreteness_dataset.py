@@ -11,6 +11,7 @@ from transformers import AutoTokenizer
 
 from src.utils.mapper import configmapper
 
+
 @configmapper.map("datasets", "transformers_concreteness")
 class TransformersConcretenessDataset(Dataset):
     """Implements the ConcretenessDataset for Concreteness Ratings.
@@ -26,9 +27,7 @@ class TransformersConcretenessDataset(Dataset):
     """
 
     def __init__(
-        self,
-        config,
-        tokenizer,
+        self, config, tokenizer,
     ):
 
         """
