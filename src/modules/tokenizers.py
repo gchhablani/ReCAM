@@ -105,3 +105,4 @@ class GloveTokenizer(Tokenizer):
 class AutoTokenizer(AutoTokenizer):
     def __init__(self, *args):
         super(AutoTokenizer, self).__init__()
+

@@ -123,9 +123,9 @@ class FortyTrainer:
 
             for step, batch in enumerate(train_loader):
                 optimizer.zero_grad()
-                *inputs, labels = [value.to(device) for value in batch]
+                inputs, labels = [value.to(device) for value in batch]
                 labels = labels.float()
-                outputs = model(*inputs)
+                outputs = model(inputs)
                 loss = criterion(torch.squeeze(outputs), labels)
                 loss.backward()
 
@@ -508,8 +508,8 @@ class FortyTrainer:
             val_loss = 0
             for j, batch in enumerate(val_loader):
 
-                *inputs, labels = [value.to(device) for value in batch]
-                outputs = model(*inputs)
+                inputs, labels = [value.to(device) for value in batch]
+                outputs = model(inputs)
                 loss = criterion(torch.squeeze(outputs), labels)
                 val_loss += loss.item()
 
@@ -548,3 +548,4 @@ class FortyTrainer:
                 )
                 return val_scores
             return return_dic
+
