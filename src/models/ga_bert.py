@@ -2,6 +2,7 @@
 from torch.nn import Module
 from src.utils.mapper import configmapper
 
+
 @configmapper.map("models", "gabert")
 class GABERT(Module):
 

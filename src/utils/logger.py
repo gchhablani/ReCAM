@@ -3,6 +3,7 @@ import json
 import torch
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
+
 # from torchvision.utils import make_grid
 # from torchviz import make_dot
 
@@ -85,21 +86,15 @@ class Logger:
     def save_hyperparams(
         self, hparam_list, hparam_name_list, metric_list, metric_name_list
     ):
-<<<<<<< HEAD
-        print(hparam_list, hparam_name_list, metric_list, metric_name_list)
-||||||| 55d759a
-        print(hparam_list, hparam_name_list,metric_list,metric_name_list)
-=======
 
         for i in range(len(hparam_list)):
             if isinstance(hparam_list[i], list):
                 hparam_list[i] = ",".join(list(map(str, hparam_list[i])))
             if isinstance(hparam_list[i], dict):
                 hparam_list[i] = json.dumps(hparam_list[i])
-            if (hparam_list[i] is None):
-                hparam_list[i] = 'None'
+            if hparam_list[i] is None:
+                hparam_list[i] = "None"
         print(hparam_list, hparam_name_list, metric_list, metric_name_list)
->>>>>>> upstream/main
         self.writer.add_hparams(
             dict(zip(hparam_name_list, hparam_list)),
             dict(zip(metric_name_list, metric_list)),

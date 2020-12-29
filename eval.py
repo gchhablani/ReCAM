@@ -18,9 +18,7 @@ tokenizer.initialize_vectors(
 
 
 validation_dataset = ConcretenessDataset(
-    file_path=val_file_path,
-    tokenizer=tokenizer,
-    split="val",
+    file_path=val_file_path, tokenizer=tokenizer, split="val",
 )
 val_loader = DataLoader(validation_dataset, batch_size=1, shuffle=False)
 embeddings = GloveEmbedding(
