@@ -1,9 +1,10 @@
 """Train File."""
 ## Imports
 import argparse
-import itertools
-import numpy as np
+
+# import itertools
 import copy
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -16,6 +17,17 @@ from src.trainers import *
 
 from src.modules.preprocessors import *
 from src.utils.mapper import configmapper
+<<<<<<< HEAD
+||||||| 55d759a
+from src.models.two_layer_nn import TwoLayerNN
+=======
+from src.utils.logger import Logger
+from src.models.two_layer_nn import TwoLayerNN
+>>>>>>> upstream/main
+
+
+import os
+dirname = os.path.dirname(__file__) ## For Paths Relative to Current File
 
 ## Config
 parser = argparse.ArgumentParser(prog="train.py", description="Train a model.")
@@ -24,27 +36,27 @@ parser.add_argument(
     type=str,
     action="store",
     help="The configuration for model",
-    default="./configs/models/forty/default.yaml",
+    default=os.path.join(dirname,"./configs/models/forty/default.yaml")
 )
 parser.add_argument(
     "--train",
     type=str,
     action="store",
     help="The configuration for model training/evaluation",
-    default="./configs/trainers/forty/train.yaml",
+    default=os.path.join(dirname,"./configs/trainers/forty/train.yaml")
 )
 parser.add_argument(
     "--data",
     type=str,
     action="store",
     help="The configuration for data",
-    default="./configs/datasets/forty/default.yaml",
+    default=os.path.join(dirname,"./configs/datasets/forty/default.yaml")
 )
 parser.add_argument(
     "--grid_search",
     action="store_true",
     help="Whether to do a grid_search",
-    default=False,
+    default= False
 )
 ### Update Tips : Can provide more options to the user.
 ### Can also provide multiple verbosity levels.
@@ -58,32 +70,46 @@ grid_search = args.grid_search
 
 # verbose = args.verbose
 
-## Seed
-seed(42)
-
 # Preprocessor, Dataset, Model
 preprocessor = configmapper.get_object(
     "preprocessors", data_config.main.preprocessor.name
 )(data_config)
 
-model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
 if grid_search:
-
     train_configs = generate_grid_search_configs(train_config, train_config.grid_search)
     print(f"Total Configurations Generated: {len(train_configs)}")
+
+
+    logger = Logger(
+        **train_config.grid_search.hyperparams.train.log.logger_params.as_dict()
+    )
+
     for train_config in train_configs:
         print(train_config)
+
+        ## Seed
+        seed(train_config.main_config.seed)
+
+        model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
         # Trainer
-        trainer = configmapper.get_object("trainers", train_config.name)(train_config)
+        trainer = configmapper.get_object("trainers", train_config.trainer_name)(
+            train_config
+        )
 
         ## Train
-        trainer.train(model, train_data, val_data)
+        trainer.train(model, train_data, val_data, logger)
 
 else:
+    ## Seed
+    seed(train_config.main_config.seed)
+
+    model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
     ## Trainer
-    trainer = configmapper.get_object("trainers", train_config.name)(train_config)
+    trainer = configmapper.get_object("trainers", train_config.trainer_name)(
+        train_config
+    )
 
     ## Train
     trainer.train(model, train_data, val_data)

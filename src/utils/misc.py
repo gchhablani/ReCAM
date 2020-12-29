@@ -41,9 +41,13 @@ def get_item_in_config(config, path):
     if isinstance(config, dict):
         for step in path:
             curr = curr[step]
+            if curr is None:
+                break
     else:
         for step in path:
             curr = curr.__getattr__(step)
+            if curr is None:
+                break
     return curr
 
 
@@ -91,13 +95,32 @@ def generate_grid_search_configs(main_config, grid_config, root="hyperparams"):
                 stack.pop()
                 continue
 
+<<<<<<< HEAD
             if "log_label" in root.keys():
                 log_label_path = copy.deepcopy(stack + ["log_label",])
+||||||| 55d759a
+            if('log_label' in root.keys()):
+                log_label_path = copy.deepcopy(stack+['log_label',])
+=======
+            if "log_label" in root.keys():
+                log_label_path = copy.deepcopy(
+                    stack
+                    + [
+                        "log_label",
+                    ]
+                )
+>>>>>>> upstream/main
             parent = root  ## Otherwise it has children
 
         for key in parent.keys():  ## For the children
             if (
-                ".".join(stack + [key,]) not in visited
+                ".".join(
+                    stack
+                    + [
+                        key,
+                    ]
+                )
+                not in visited
             ):  ## Check if I have visited these children
                 flag = 1  ## If not, we need to repeat the process for this key
                 stack.append(key)  ## Append this key to the stack

@@ -5,14 +5,14 @@ main_config: &main
     metrics:
         - sklearn_mse
     device:
-        name: 'cuda:0'
+        name: 'cpu'
 
 train: &train
     # Change to different value if not using max_steps
     <<: *main
     # Can add the max_epochs vs max_steps functionality
     append_text: train
-    max_epochs: !!int 10
+    max_epochs: !!int 2
     loader_params:
         batch_size: !!int 32
         num_workers: !!int 4
@@ -39,6 +39,7 @@ train: &train
 
     save_after_epoch: false
 
+
     checkpoint:
         checkpoint_dir: './ckpts/forty/'
 
@@ -51,7 +52,7 @@ train: &train
             model: two_layer_nn
             trainer: forty
             comment: "Trial for Logger and Trainer"
-            log_dir: './logs/'
+            log_dir: './logs/forty/train'
         log_label: 1
         values:
             loss: true
@@ -66,49 +67,100 @@ val:
         batch_size: !!int 32
         num_workers: !!int 4
         shuffle: false
-
+    # log:
+    #     logger_params:
+    #         model: two_layer_nn
+    #         trainer: forty
+    #         comment: "Trial for Logger and Trainer"
+    #         log_dir: './logs/forty/eval'
+    #     log_label: 1
+    #     values:
+    #         loss: true
+    #         metrics: true
+            # hparams: true
 grid_search:
   directory: null
   hyperparams:
     train:
-      max_epochs: !!int 10
+      max_epochs: !!int 2
       loader_params:
         batch_size:
           - !!int 32
-          - !!int 64
+          # - !!int 64
           # - !!int 128
       optimizer:
         type:
           - adam_w
-          - adam
-        params:
-          lr:
-            - !!float 1e-4
-            - !!float 1e-5
+        #   - adam
+        # params:
+        #   lr:
+        #     - !!float 1e-4
+        #     - !!float 1e-5
+            # - !!float 1e-6
+          # weight_decay:
+          #   - 0
+          #   - 0.01
+        # - type: adam_w
+        #   params:
+        #     lr: !!float 1e-5
+        #     betas: [0.9,0.998]
+        #     eps: !!float 1e-8
+        #
+        # - type: adam_w
+        #   params:
+        #     lr: !!float 1e-6
+        #     betas: [0.9,0.998]
+        #     eps: !!float 1e-7
+        #
+        # - type: sgd
+        #   params:
+        #     lr: !!float 1e-6
+        #     momentum: 0.9
+        # params:
+        #   lr:
+        #     - !!float 1e-5
+        #     - !!float 1e-6
+        #     - !!float 1e-7
+        #   betas:
+        #     - [0.9,0.998]
+        #     - [0.9,0.999]
+        #     - [0.95,0.998]
 
       scheduler:
           - null
+          # - type: step
+          #   params:
+          #     step_size: !!int 100
+          #     gamma: 0.1
 
-          - type: reduceplateau
-            params:
-              mode: min
-              factor: !!float 0.1
-              patience: !!float 3
+          # - type: cosineanneal
+          #   params:
+          #     T_max: !!int 100
+          #     eta_min: !!float 1e-9
 
-          - type: cyclic
-            params:
-              base_lr: !!float 1e-7
-              max_lr: !!float 1e-3
-              step_size_up: !!int 100
-              step_size_down: !!int 200
-              mode: exp_range
-              cycle_momentum: false
+          # - type: reduceplateau
+          #   params:
+          #     mode: min
+          #     factor: !!float 0.1
+          #     patience: !!float 3
+          #
+          # - type: cyclic
+          #   params:
+          #     base_lr: !!float 1e-7
+          #     max_lr: !!float 1e-3
+          #     step_size_up: !!int 100
+          #     step_size_down: !!int 200
+          #     mode: exp_range
+          #     cycle_momentum: false
+          #
+          #
+          # - type: cosineannealrestart
+          #   params:
+          #     T_0: !!int 100
+          #     T_mult: !!int 2
+          #     eta_min: !!float 1e-9
 
-          - type: cosineannealrestart
-            params:
-              T_0: !!int 100
-              T_mult: !!int 2
-              eta_min: !!float 1e-9
+
 
       log:
         logger_params:

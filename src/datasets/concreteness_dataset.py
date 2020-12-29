@@ -32,7 +32,12 @@ class ConcretenessDataset(Dataset):
         self.config = config
         self.data = pd.read_csv(
             self.config.file_path, error_bad_lines=False, delimiter="\t"
-        )[self.config.text_cols + [self.config.label_col,]].dropna()
+        )[
+            self.config.text_cols
+            + [
+                self.config.label_col,
+            ]
+        ].dropna()
         self.tokenizer = tokenizer
 
     def __len__(self):
