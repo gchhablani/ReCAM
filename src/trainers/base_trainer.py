@@ -136,8 +136,8 @@ class FortyTrainer:
                 optimizer.step()
 
                 if self.train_config.scheduler is not None:
-                    if(isinstance(scheduler, ReduceLROnPlateau)):
-                        scheduler.step(train_loss/(global_step+1))
+                    if isinstance(scheduler, ReduceLROnPlateau):
+                        scheduler.step(train_loss / (global_step + 1))
                     else:
                         scheduler.step()
 
@@ -328,14 +328,8 @@ class FortyTrainer:
                     train_logger.save_hyperparams(
                         best_hparam_list,
                         best_hparam_name_list,
-                        [
-                            int(self.log_label),
-                        ]
-                        + best_metrics_list
-                        + final_metrics_list,
-                        [
-                            "hparams/log_label",
-                        ]
+                        [int(self.log_label),] + best_metrics_list + final_metrics_list,
+                        ["hparams/log_label",]
                         + best_metrics_name_list
                         + final_metrics_name_list,
                     )
@@ -354,18 +348,7 @@ class FortyTrainer:
         ]
         metric_name_list = [metric for metric in self._config.main_config.metrics]
 
-        return dict(
-            zip(
-                [
-                    loss_name,
-                ]
-                + metric_name_list,
-                [
-                    avg_loss,
-                ]
-                + metric_list,
-            )
-        )
+        return dict(zip([loss_name,] + metric_name_list, [avg_loss,] + metric_list,))
 
     def check_best(self, val_scores, save_on_score, best_score, global_step):
         save_flag = 0
@@ -425,18 +408,7 @@ class FortyTrainer:
         append_text,
     ):
 
-        return_dic = dict(
-            zip(
-                [
-                    loss_name,
-                ]
-                + metric_name_list,
-                [
-                    loss,
-                ]
-                + metric_list,
-            )
-        )
+        return_dic = dict(zip([loss_name,] + metric_name_list, [loss,] + metric_list,))
 
         loss_name = f"{append_text}_{self.log_label}_{loss_name}"
         if log_values["loss"]:
@@ -518,16 +490,7 @@ class FortyTrainer:
             ]
             metric_name_list = [metric for metric in self._config.main_config.metrics]
             return_dic = dict(
-                zip(
-                    [
-                        val_loss_name,
-                    ]
-                    + metric_name_list,
-                    [
-                        loss,
-                    ]
-                    + metric_list,
-                )
+                zip([val_loss_name,] + metric_name_list, [loss,] + metric_list,)
             )
             if log:
                 val_scores = self.log(
