@@ -7,13 +7,12 @@ import pickle
 
 import torch
 from torch.utils.data import Dataset
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 from src.utils.mapper import configmapper
 
-
-@configmapper.map("datasets", "bert_concreteness")
-class BertConcretenessDataset(Dataset):
+@configmapper.map("datasets", "transformers_concreteness")
+class TransformersConcretenessDataset(Dataset):
     """Implements the ConcretenessDataset for Concreteness Ratings.
 
     Args:
@@ -29,10 +28,11 @@ class BertConcretenessDataset(Dataset):
     def __init__(
         self,
         config,
+        tokenizer,
     ):
 
         """
-        Construct the BertConcretenessDataset.
+        Construct the TransformersConcretenessDataset.
 
         Args:
             config (src.utils.configuration.Config): Configuration for the dataset class
@@ -46,7 +46,7 @@ class BertConcretenessDataset(Dataset):
 
         self.data = self.csv_file.to_dict(orient="records")
 
-        self.tokenizer = BertTokenizer.from_pretrained(self.config.model_name)
+        self.tokenizer = tokenizer
 
     def __len__(self):
 
@@ -69,8 +69,8 @@ class BertConcretenessDataset(Dataset):
             inputs (dict): inputs with keys "input_ids", "token_type_ids", "attention_mask", "labels"
         """
 
-        text = self.data[idx]["Word"]
-        score = self.data[idx]["Conc.M"]
+        text = self.data[idx][self.config.text_cols]
+        score = self.data[idx][self.config.label_cols]
 
         text = str(text).lower().split("_")
         text = " ".join(text)
@@ -123,4 +123,5 @@ class BertConcretenessDataset(Dataset):
 
         for key in inputs:
             inputs[key] = torch.tensor(inputs[key])
-        return inputs
+        # to conform with our pattern, do this
+        return inputs, inputs["labels"]
