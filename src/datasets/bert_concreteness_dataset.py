@@ -27,8 +27,7 @@ class BertConcretenessDataset(Dataset):
     """
 
     def __init__(
-        self,
-        config,
+        self, config,
     ):
 
         """

@@ -66,14 +66,10 @@ def main():
     t0 = time.time()
 
     dataset = LineByLineTextDataset(
-        tokenizer=tokenizer,
-        file_path=args["train_data_file"],
-        block_size=512,
+        tokenizer=tokenizer, file_path=args["train_data_file"], block_size=512,
     )
     val_dataset = LineByLineTextDataset(
-        tokenizer=tokenizer,
-        file_path=args["val_data_file"],
-        block_size=512,
+        tokenizer=tokenizer, file_path=args["val_data_file"], block_size=512,
     )
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=True, mlm_probability=args["mlm_probability"]

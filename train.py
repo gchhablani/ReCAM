@@ -17,17 +17,11 @@ from src.trainers import *
 
 from src.modules.preprocessors import *
 from src.utils.mapper import configmapper
-<<<<<<< HEAD
-||||||| 55d759a
-from src.models.two_layer_nn import TwoLayerNN
-=======
 from src.utils.logger import Logger
-from src.models.two_layer_nn import TwoLayerNN
->>>>>>> upstream/main
-
 
 import os
-dirname = os.path.dirname(__file__) ## For Paths Relative to Current File
+
+dirname = os.path.dirname(__file__)  ## For Paths Relative to Current File
 
 ## Config
 parser = argparse.ArgumentParser(prog="train.py", description="Train a model.")
@@ -36,27 +30,27 @@ parser.add_argument(
     type=str,
     action="store",
     help="The configuration for model",
-    default=os.path.join(dirname,"./configs/models/forty/default.yaml")
+    default=os.path.join(dirname, "./configs/models/forty/default.yaml"),
 )
 parser.add_argument(
     "--train",
     type=str,
     action="store",
     help="The configuration for model training/evaluation",
-    default=os.path.join(dirname,"./configs/trainers/forty/train.yaml")
+    default=os.path.join(dirname, "./configs/trainers/forty/train.yaml"),
 )
 parser.add_argument(
     "--data",
     type=str,
     action="store",
     help="The configuration for data",
-    default=os.path.join(dirname,"./configs/datasets/forty/default.yaml")
+    default=os.path.join(dirname, "./configs/datasets/forty/default.yaml"),
 )
 parser.add_argument(
     "--grid_search",
     action="store_true",
     help="Whether to do a grid_search",
-    default= False
+    default=False,
 )
 ### Update Tips : Can provide more options to the user.
 ### Can also provide multiple verbosity levels.
@@ -79,7 +73,6 @@ preprocessor = configmapper.get_object(
 if grid_search:
     train_configs = generate_grid_search_configs(train_config, train_config.grid_search)
     print(f"Total Configurations Generated: {len(train_configs)}")
-
 
     logger = Logger(
         **train_config.grid_search.hyperparams.train.log.logger_params.as_dict()

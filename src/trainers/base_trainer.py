@@ -162,7 +162,7 @@ class FortyTrainer:
                         train_logger,
                         train_log_values,
                     )
-
+                    model.train()
                     if self.train_config.save_on is not None:
 
                         ## BEST SCORES UPDATING
@@ -452,6 +452,7 @@ class FortyTrainer:
         train_log_values=None,
         log=True,
     ):
+        model.eval()
         append_text = self.val_config.append_text
         if train_logger is not None:
             val_logger = train_logger
