@@ -16,23 +16,19 @@ main_config: &main
         params:
           average: macro
 
-      - type: sklearn_roc
-        params:
-          average: macro
-
       - type: sklearn_acc
         params: 
             normalize: True
 
     device:
-        name: 'cpu'
+        name: 'cuda'
 
 train: &train
     # Change to different value if not using max_steps
     <<: *main
     # Can add the max_epochs vs max_steps functionality
     append_text: train
-    max_epochs: !!int 10
+    max_epochs: !!int 4
     loader_params:
         batch_size: !!int 2
         num_workers: !!int 4
@@ -52,7 +48,7 @@ train: &train
         params: null
 
     save_on : ##Best Model/Final Model Saving
-      score: mse
+      score: sklearn_acc
       desired: min
       best_path: './ckpts/cloze/train/best_{}.pth'
       final_path: './ckpts/cloze/train/final_{}.pth'
@@ -63,7 +59,7 @@ train: &train
 
     log_and_val_interval: !!int 100 ## Set to null if using different val and log intervals, Overrides log_interval nd val_interval
 
-    val_interval: !!int 100 # Global steps
+    val_interval: !!int 500 # Global steps
     log:
         log_interval: !!int 100 # Global Steps
         logger_params:

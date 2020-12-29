@@ -125,7 +125,7 @@ class ClozeTrainer:
                 loss.backward()
 
                 all_labels = torch.cat((all_labels, labels), 0)
-                all_outputs = torch.cat((all_outputs, outputs), 0)
+                all_outputs = torch.cat((all_outputs, torch.argmax(outputs, axis=1)), 0)
 
                 train_loss += loss.item()
                 optimizer.step()
@@ -160,7 +160,11 @@ class ClozeTrainer:
                         training_loss = train_loss / global_step
 
                         metric_list = [
-                            metric(all_outputs.detach().cpu(), all_labels.cpu())
+                            metric(
+                                all_outputs.detach().cpu(),
+                                all_labels.cpu(),
+                                **self.metrics[metric],
+                            )
                             for metric in self.metrics
                         ]
                         metric_name_list = [
@@ -524,6 +528,7 @@ class ClozeTrainer:
             val_loss = val_loss / len(val_loader)
 
             val_loss_name = self.train_config.criterion.type
+            outputs = torch.argmax(outputs, axis=1)
             metric_list = [
                 metric(outputs.detach().cpu(), labels.cpu(), **self.metrics[metric])
                 for metric in self.metrics

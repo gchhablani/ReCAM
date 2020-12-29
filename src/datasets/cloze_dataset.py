@@ -71,7 +71,10 @@ class ClozeDataset(Dataset):
             + data["question"].lower().replace("@placeholder", "[MASK]")
         )
         article = self.tokenizer(
-            article, return_token_type_ids=False, return_attention_mask=False
+            article,
+            return_token_type_ids=False,
+            return_attention_mask=False,
+            verbose=False,
         )
 
         if (
@@ -92,6 +95,7 @@ class ClozeDataset(Dataset):
                 return_token_type_ids=False,
                 return_attention_mask=False,
                 add_special_tokens=False,
+                verbose=False,
             )
             options_tokenized.append(option)
 
