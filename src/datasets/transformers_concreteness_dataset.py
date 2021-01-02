@@ -38,7 +38,7 @@ class TransformersConcretenessDataset(Dataset):
         Args:
             config (src.utils.configuration.Config): Configuration for the dataset class
         """
-        super(ConcretenessDataset, self).__init__()
+        super(TransformersConcretenessDataset, self).__init__()
         # self.data = pickle.load(open(data_path, "rb"))
         self.config = config
         self.csv_file = pd.read_csv(
@@ -46,6 +46,7 @@ class TransformersConcretenessDataset(Dataset):
         )
 
         self.data = self.csv_file.to_dict(orient="records")
+        # print(self.data[:5])
 
         self.tokenizer = tokenizer
 
@@ -69,7 +70,9 @@ class TransformersConcretenessDataset(Dataset):
         Returns:
             inputs (dict): inputs with keys "input_ids", "token_type_ids", "attention_mask", "labels"
         """
-
+        # print(self.data[idx])
+        # print(self.data[idx]['Word'])
+        # print(self.config.text_cols)
         text = self.data[idx][self.config.text_cols]
         score = self.data[idx][self.config.label_cols]
 
@@ -90,7 +93,7 @@ class TransformersConcretenessDataset(Dataset):
         Returns:
             inputs (dict of torch tensors): keys "input_ids", "token_type_ids", "attention_mask", "labels"
         """
-
+        # print("HIIII")
         pad_id = self.tokenizer.convert_tokens_to_ids("[PAD]")
         max_len = 0
         inputs = {
@@ -101,11 +104,12 @@ class TransformersConcretenessDataset(Dataset):
         }
 
         for sample in batch:
-            max_len = max(max_len, len(sample["input_ids"].tolist()[0]))
+            # print(sample["input_ids"])
+            max_len = max(max_len, len(sample["input_ids"]))
 
             for key in sample:
                 if key != "labels":
-                    inputs[key].append(sample[key].tolist()[0].copy())
+                    inputs[key].append(sample[key].copy())
                 else:
                     inputs[key].append(sample[key])
 
@@ -125,4 +129,6 @@ class TransformersConcretenessDataset(Dataset):
         for key in inputs:
             inputs[key] = torch.tensor(inputs[key])
         # to conform with our pattern, do this
-        return inputs, inputs["labels"]
+        labels_batched = inputs["labels"]
+        del inputs["labels"]
+        return inputs, labels_batched
