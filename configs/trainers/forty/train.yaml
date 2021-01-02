@@ -1,4 +1,4 @@
-trainer_name: forty
+trainer_name: base
 version: 1.0
 main_config: &main
     seed: !!int 42
