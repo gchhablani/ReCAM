@@ -136,8 +136,8 @@ class BaseTrainer:
                 optimizer.step()
 
                 if self.train_config.scheduler is not None:
-                    if(isinstance(scheduler, ReduceLROnPlateau)):
-                        scheduler.step(train_loss/(step+1))
+                    if isinstance(scheduler, ReduceLROnPlateau):
+                        scheduler.step(train_loss / (step + 1))
                     else:
                         scheduler.step()
 
@@ -214,7 +214,7 @@ class BaseTrainer:
                     ]
 
                     train_scores = self.log(
-                        train_loss / (step+1),
+                        train_loss / (step + 1),
                         train_loss_name,
                         metric_list,
                         metric_name_list,
@@ -224,7 +224,6 @@ class BaseTrainer:
                         append_text=self.train_config.append_text,
                     )
 
-
             if not os.path.exists(self.train_config.checkpoint.checkpoint_dir):
                 os.makedirs(self.train_config.checkpoint.checkpoint_dir)
 
@@ -233,7 +232,7 @@ class BaseTrainer:
                     "model_state_dict": model.state_dict(),
                 }
 
-                path =f"{self.train_config.checkpoint.checkpoint_dir}_{str(self.train_config.log.log_label)}_{str(epoch)}.pth"
+                path = f"{self.train_config.checkpoint.checkpoint_dir}_{str(self.train_config.log.log_label)}_{str(epoch)}.pth"
 
                 self.save(store_dict, path, save_flag=1)
 
@@ -252,7 +251,8 @@ class BaseTrainer:
             # print("\nLogging\n")
             train_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu()) for metric in self.metrics
+                metric(all_outputs.detach().cpu(), all_labels.cpu())
+                for metric in self.metrics
             ]
             metric_name_list = [metric for metric in self._config.main_config.metrics]
 
@@ -414,8 +414,8 @@ class BaseTrainer:
 
     def save(self, store_dict, path, save_flag=0):
         if save_flag:
-            dirs = '/'.join(path.split('/')[:-1])
-            if(not os.path.exists(dirs)):
+            dirs = "/".join(path.split("/")[:-1])
+            if not os.path.exists(dirs):
                 os.makedirs(dirs)
             torch.save(store_dict, path)
 
@@ -520,7 +520,8 @@ class BaseTrainer:
 
             val_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu()) for metric in self.metrics
+                metric(all_outputs.detach().cpu(), all_labels.cpu())
+                for metric in self.metrics
             ]
             metric_name_list = [metric for metric in self._config.main_config.metrics]
             return_dic = dict(

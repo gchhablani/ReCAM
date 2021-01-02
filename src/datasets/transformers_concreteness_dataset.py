@@ -27,7 +27,9 @@ class TransformersConcretenessDataset(Dataset):
     """
 
     def __init__(
-        self, config, tokenizer,
+        self,
+        config,
+        tokenizer,
     ):
 
         """

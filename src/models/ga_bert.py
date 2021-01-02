@@ -13,9 +13,7 @@ class GABERT(Module):
     """
 
     def __init__(self):
-        """Construct the GABERT Model.
-
-        """
+        """Construct the GABERT Model."""
         super(GABERT, self).__init__()
 
     def forward(self, x_input):

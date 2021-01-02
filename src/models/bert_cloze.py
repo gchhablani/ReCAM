@@ -20,7 +20,7 @@ ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
 class BertLayerNorm(nn.Module):
     def __init__(self, config, variance_epsilon=1e-12):
         """
-            Construct a layernorm module in the TF style (epsilon inside the square root).
+        Construct a layernorm module in the TF style (epsilon inside the square root).
         """
         super(BertLayerNorm, self).__init__()
         self.gamma = nn.Parameter(torch.ones(config.hidden_size))
@@ -105,8 +105,8 @@ class BertForCloze(BertPreTrainedModel):
 
     def init_weights(self, module):
 
-        """ 
-            Initialize the weights.
+        """
+        Initialize the weights.
         """
         if isinstance(module, (nn.Linear, nn.Embedding)):
             module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
@@ -118,13 +118,13 @@ class BertForCloze(BertPreTrainedModel):
 
     def forward(self, x_input):
         """
-            Return the output of Bert For Cloze.
+        Return the output of Bert For Cloze.
 
-            Args:
-                x_input (torch.Tensor): Tensor List of articles, articles_mask, ops, question_pos
+        Args:
+            x_input (torch.Tensor): Tensor List of articles, articles_mask, ops, question_pos
 
-            Returns:
-                x_output (torch.Tensor): The output regression scores for each option
+        Returns:
+            x_output (torch.Tensor): The output regression scores for each option
         """
         articles, articles_mask, ops, question_pos = x_input
         bsz = ops.size(0)
