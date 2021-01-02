@@ -88,7 +88,7 @@ class TransformersConcretenessPreprocessor(Preprocessor):
         Args:
             config (src.utils.module.Config): configuration for preprocessor
         """
-        super(BertConcretenessPreprocessor, self).__init__()
+        super(TransformersConcretenessPreprocessor, self).__init__()
         self.config = config
         self.tokenizer = configmapper.get_object(
             "tokenizers", self.config.main.preprocessor.tokenizer.name

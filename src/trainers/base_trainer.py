@@ -64,10 +64,14 @@ class BaseTrainer:
             criterion = configmapper.get_object(
                 "losses", self.train_config.criterion.type
             )()
-
-        train_loader = DataLoader(
-            train_dataset, **self.train_config.loader_params.as_dict()
-        )
+        if("custom_collate_fn" in dir(train_dataset)):
+            train_loader = DataLoader(
+                dataset=train_dataset, collate_fn=train_dataset.custom_collate_fn, **self.train_config.loader_params.as_dict()
+            )
+        else:
+            train_loader = DataLoader(
+                dataset=train_dataset, **self.train_config.loader_params.as_dict()
+            )
         # train_logger = Logger(**self.train_config.log.logger_params.as_dict())
 
         max_epochs = self.train_config.max_epochs
@@ -123,9 +127,12 @@ class BaseTrainer:
 
             for step, batch in enumerate(train_loader):
                 optimizer.zero_grad()
-                *inputs, labels = [value.to(device) for value in batch]
+                inputs, labels = batch
                 labels = labels.float()
-                outputs = model(*inputs)
+                for key in inputs:
+                    inputs[key] = inputs[key].to(device)
+                labels = labels.to(device)
+                outputs = model(inputs)
                 loss = criterion(torch.squeeze(outputs), labels)
                 loss.backward()
 
@@ -496,8 +503,10 @@ class BaseTrainer:
             val_log_values = train_log_values
         else:
             val_log_values = self.val_config.log.values.as_dict()
-
-        val_loader = DataLoader(dataset, **self.val_config.loader_params.as_dict())
+        if("custom_collate_fn" in dir(dataset)):
+            val_loader = DataLoader(dataset=dataset,collate_fn=dataset.custom_collate_fn, **self.val_config.loader_params.as_dict())
+        else:
+            val_loader = DataLoader(dataset=dataset, **self.val_config.loader_params.as_dict())
 
         all_outputs = torch.Tensor().to(device)
         all_labels = torch.FloatTensor().to(device)
@@ -508,8 +517,13 @@ class BaseTrainer:
             val_loss = 0
             for j, batch in enumerate(val_loader):
 
-                *inputs, labels = [value.to(device) for value in batch]
-                outputs = model(*inputs)
+                inputs, labels = batch
+                labels = labels.float()
+                for key in inputs:
+                    inputs[key] = inputs[key].to(device)
+                labels = labels.to(device)
+
+                outputs = model(inputs)
                 loss = criterion(torch.squeeze(outputs), labels)
                 val_loss += loss.item()
 
