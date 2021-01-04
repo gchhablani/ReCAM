@@ -30,9 +30,13 @@ class ClozeTrainer:
         self.log_label = self.train_config.log.log_label
         if self.train_config.log_and_val_interval is not None:
             self.val_log_together = True
+        ckpts_dir = os.path.split(self.train_config.save_on.best_path)[0]
+        if not os.path.exists(ckpts_dir):
+            os.makedirs(ckpts_dir)
         print("Logging with label: ", self.log_label)
 
     def train(self, model, train_dataset, val_dataset=None):
+        
         device = torch.device(self._config.main_config.device.name)
         model.to(device)
         optim_params = self.train_config.optimizer.params
