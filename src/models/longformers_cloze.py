@@ -3,7 +3,7 @@ import torch
 import math
 import torch.nn as nn
 from src.utils.mapper import configmapper
-from transformers import LongformerModel,PreTrainedModel,LongformerConfig
+from transformers import LongformerModel, PreTrainedModel, LongformerConfig
 
 
 def gelu(x):
@@ -15,6 +15,7 @@ def swish(x):
 
 
 ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
+
 
 class LongformerPreTrainedModel(PreTrainedModel):
     """
@@ -37,6 +38,7 @@ class LongformerPreTrainedModel(PreTrainedModel):
             module.weight.data.fill_(1.0)
         if isinstance(module, nn.Linear) and module.bias is not None:
             module.bias.data.zero_()
+
 
 class LongformerLayerNorm(nn.Module):
     def __init__(self, config, variance_epsilon=1e-12):
@@ -89,7 +91,9 @@ class LongformerLMPredictionHead(nn.Module):
             bias=False,
         )
         self.decoder.weight = longformer_model_embedding_weights
-        self.bias = nn.Parameter(torch.zeros(longformer_model_embedding_weights.size(0)))
+        self.bias = nn.Parameter(
+            torch.zeros(longformer_model_embedding_weights.size(0))
+        )
 
     def forward(self, hidden_states):
         hidden_states = self.transform(hidden_states)
@@ -101,7 +105,9 @@ class LongformerLMPredictionHead(nn.Module):
 class LongformerOnlyMLMHead(nn.Module):
     def __init__(self, config, longformer_model_embedding_weights):
         super(LongformerOnlyMLMHead, self).__init__()
-        self.predictions = LongformerLMPredictionHead(config, longformer_model_embedding_weights)
+        self.predictions = LongformerLMPredictionHead(
+            config, longformer_model_embedding_weights
+        )
 
     def forward(self, sequence_output):
         prediction_scores = self.predictions(sequence_output)
@@ -120,12 +126,15 @@ class LongformerForCloze(LongformerPreTrainedModel):
 
         super(LongformerForCloze, self).__init__(config)
         self.longformer = LongformerModel(config)
-        self.cls = LongformerOnlyMLMHead(config, self.longformer.embeddings.word_embeddings.weight)
+        self.cls = LongformerOnlyMLMHead(
+            config, self.longformer.embeddings.word_embeddings.weight
+        )
         self.config = config
 
         self.init_weights(self.cls)
         self.vocab_size = self.longformer.embeddings.word_embeddings.weight.size(0)
         # print("MODEL EXPECT SIZE",self.vocab_size)
+
     def init_weights(self, module):
 
         """
@@ -167,17 +176,17 @@ class LongformerForCloze(LongformerPreTrainedModel):
         # print(out.shape)
         # convert ops to one hot
         out = out.view(bsz, opnum, 1, self.vocab_size)
-        out[:,:,:,pad_token_id] = 0
+        out[:, :, :, pad_token_id] = 0
         out = out.expand(bsz, opnum, 5, self.vocab_size)
         # print(out.shape)
-        out_tokens = torch.zeros((bsz,opnum,5,1),device=ops.device)
-        pad_tokens = ops.shape[3] - torch.sum((ops==pad_token_id), dim = 3).unsqueeze(3)
-        
+        out_tokens = torch.zeros((bsz, opnum, 5, 1), device=ops.device)
+        pad_tokens = ops.shape[3] - torch.sum((ops == pad_token_id), dim=3).unsqueeze(3)
+
         for i in range(ops.shape[3]):
-          ops_token = ops[:,:,:,i].unsqueeze(3)
-          out_tokens  += torch.gather(out,3,ops_token)
-        
-        out_tokens = torch.div(out_tokens,pad_tokens)
+            ops_token = ops[:, :, :, i].unsqueeze(3)
+            out_tokens += torch.gather(out, 3, ops_token)
+
+        out_tokens = torch.div(out_tokens, pad_tokens)
         out = out_tokens
         out = out.view(-1, 5)
         # print(out.shape)

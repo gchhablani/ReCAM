@@ -64,9 +64,11 @@ class BaseTrainer:
             criterion = configmapper.get_object(
                 "losses", self.train_config.criterion.type
             )()
-        if("custom_collate_fn" in dir(train_dataset)):
+        if "custom_collate_fn" in dir(train_dataset):
             train_loader = DataLoader(
-                dataset=train_dataset, collate_fn=train_dataset.custom_collate_fn, **self.train_config.loader_params.as_dict()
+                dataset=train_dataset,
+                collate_fn=train_dataset.custom_collate_fn,
+                **self.train_config.loader_params.as_dict(),
             )
         else:
             train_loader = DataLoader(
@@ -338,14 +340,8 @@ class BaseTrainer:
                     train_logger.save_hyperparams(
                         best_hparam_list,
                         best_hparam_name_list,
-                        [
-                            int(self.log_label),
-                        ]
-                        + best_metrics_list
-                        + final_metrics_list,
-                        [
-                            "hparams/log_label",
-                        ]
+                        [int(self.log_label),] + best_metrics_list + final_metrics_list,
+                        ["hparams/log_label",]
                         + best_metrics_name_list
                         + final_metrics_name_list,
                     )
@@ -364,18 +360,7 @@ class BaseTrainer:
         ]
         metric_name_list = [metric for metric in self._config.main_config.metrics]
 
-        return dict(
-            zip(
-                [
-                    loss_name,
-                ]
-                + metric_name_list,
-                [
-                    avg_loss,
-                ]
-                + metric_list,
-            )
-        )
+        return dict(zip([loss_name,] + metric_name_list, [avg_loss,] + metric_list,))
 
     def check_best(self, val_scores, save_on_score, best_score, global_step):
         save_flag = 0
@@ -438,18 +423,7 @@ class BaseTrainer:
         append_text,
     ):
 
-        return_dic = dict(
-            zip(
-                [
-                    loss_name,
-                ]
-                + metric_name_list,
-                [
-                    loss,
-                ]
-                + metric_list,
-            )
-        )
+        return_dic = dict(zip([loss_name,] + metric_name_list, [loss,] + metric_list,))
 
         loss_name = f"{append_text}_{self.log_label}_{loss_name}"
         if log_values["loss"]:
@@ -503,10 +477,16 @@ class BaseTrainer:
             val_log_values = train_log_values
         else:
             val_log_values = self.val_config.log.values.as_dict()
-        if("custom_collate_fn" in dir(dataset)):
-            val_loader = DataLoader(dataset=dataset,collate_fn=dataset.custom_collate_fn, **self.val_config.loader_params.as_dict())
+        if "custom_collate_fn" in dir(dataset):
+            val_loader = DataLoader(
+                dataset=dataset,
+                collate_fn=dataset.custom_collate_fn,
+                **self.val_config.loader_params.as_dict(),
+            )
         else:
-            val_loader = DataLoader(dataset=dataset, **self.val_config.loader_params.as_dict())
+            val_loader = DataLoader(
+                dataset=dataset, **self.val_config.loader_params.as_dict()
+            )
 
         all_outputs = torch.Tensor().to(device)
         all_labels = torch.FloatTensor().to(device)
@@ -539,16 +519,7 @@ class BaseTrainer:
             ]
             metric_name_list = [metric for metric in self._config.main_config.metrics]
             return_dic = dict(
-                zip(
-                    [
-                        val_loss_name,
-                    ]
-                    + metric_name_list,
-                    [
-                        val_loss,
-                    ]
-                    + metric_list,
-                )
+                zip([val_loss_name,] + metric_name_list, [val_loss,] + metric_list,)
             )
             if log:
                 val_scores = self.log(
