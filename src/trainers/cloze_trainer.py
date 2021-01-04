@@ -35,8 +35,8 @@ class ClozeTrainer:
             os.makedirs(ckpts_dir)
         print("Logging with label: ", self.log_label)
 
-    def train(self, model, train_dataset, val_dataset=None):
-
+    def train(self, model, train_dataset, val_dataset=None, logger=None):
+        
         device = torch.device(self._config.main_config.device.name)
         model.to(device)
         optim_params = self.train_config.optimizer.params
@@ -87,7 +87,10 @@ class ClozeTrainer:
             val_interval = self.train_config.val_interval
             log_interval = self.train_config.log.log_interval
 
-        train_logger = Logger(**self.train_config.log.logger_params.as_dict())
+        if logger is None:
+            train_logger = Logger(**self.train_config.log.logger_params.as_dict())
+        else:
+            train_logger = logger
         train_log_values = self.train_config.log.values.as_dict()
 
         best_score = (
@@ -179,8 +182,14 @@ class ClozeTrainer:
 
                         train_scores = dict(
                             zip(
-                                [train_loss_name,] + metric_name_list,
-                                [training_loss,] + metric_list,
+                                [
+                                    train_loss_name,
+                                ]
+                                + metric_name_list,
+                                [
+                                    training_loss,
+                                ]
+                                + metric_list,
                             )
                         )
 
@@ -264,6 +273,7 @@ class ClozeTrainer:
                         append_text=self.train_config.append_text,
                     )
 
+            pbar.close()
             if not os.path.exists(self.train_config.checkpoint.checkpoint_dir):
                 os.makedirs(self.train_config.checkpoint.checkpoint_dir)
 
@@ -303,8 +313,14 @@ class ClozeTrainer:
 
                     train_scores = dict(
                         zip(
-                            [train_loss_name,] + metric_name_list,
-                            [training_loss,] + metric_list,
+                            [
+                                train_loss_name,
+                            ]
+                            + metric_name_list,
+                            [
+                                training_loss,
+                            ]
+                            + metric_list,
                         )
                     )
 
@@ -373,8 +389,14 @@ class ClozeTrainer:
 
                     train_scores = dict(
                         zip(
-                            [train_loss_name,] + metric_name_list,
-                            [training_loss,] + metric_list,
+                            [
+                                train_loss_name,
+                            ]
+                            + metric_name_list,
+                            [
+                                training_loss,
+                            ]
+                            + metric_list,
                         )
                     )
 
@@ -450,7 +472,18 @@ class ClozeTrainer:
         append_text,
     ):
 
-        return_dic = dict(zip([loss_name,] + metric_name_list, [loss,] + metric_list,))
+        return_dic = dict(
+            zip(
+                [
+                    loss_name,
+                ]
+                + metric_name_list,
+                [
+                    loss,
+                ]
+                + metric_list,
+            )
+        )
 
         loss_name = f"{append_text}_{self.log_label}_{loss_name}"
         if log_values["loss"]:
@@ -525,7 +558,10 @@ class ClozeTrainer:
                     torch.tensor(value, device=device) for value in batch
                 ]
                 outputs = model(inputs)
-                loss = criterion(torch.squeeze(outputs), labels)
+                # print("OUTPUTS:",outputs.shape)
+                # print("SQEEZED OUTPUTS:",torch.squeeze(outputs).shape)
+                # print("LABELS",labels.shape)
+                loss = criterion(outputs, labels)
                 val_loss += loss.item()
 
                 all_labels = torch.cat((all_labels, labels), 0)
@@ -543,7 +579,16 @@ class ClozeTrainer:
                 metric["type"] for metric in self._config.main_config.metrics
             ]
             return_dic = dict(
-                zip([val_loss_name,] + metric_name_list, [loss,] + metric_list,)
+                zip(
+                    [
+                        val_loss_name,
+                    ]
+                    + metric_name_list,
+                    [
+                        loss,
+                    ]
+                    + metric_list,
+                )
             )
             if log:
                 val_scores = self.log(
@@ -557,3 +602,4 @@ class ClozeTrainer:
                     append_text,
                 )
             return return_dic
+
