@@ -99,7 +99,6 @@ grid_search:
       max_epochs: !!int 10
       loader_params:
         batch_size:
-          - !!int 2
           - !!int 4
       optimizer:
         type:
@@ -107,14 +106,14 @@ grid_search:
           # - adam
         params:
           lr:
-            - !!float 1e-3
             - !!float 1e-4
             - !!float 1e-5
             - !!float 1e-6
-            - !!float 1e-7
           weight_decay:
             - 0
-            - 0.01
+            - 0.001
+            - 0.0001
+            - 0.00001
         # - type: adam_w
         #   params:
         #     lr: !!float 1e-5

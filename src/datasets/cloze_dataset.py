@@ -42,8 +42,8 @@ class ClozeDataset(Dataset):
                     json.loads(datapoint) for datapoint in f.read().splitlines()
                 ]
 
-        self.mask_id = self.tokenizer.convert_tokens_to_ids("[MASK]")
-        self.pad_id = self.tokenizer.convert_tokens_to_ids("[PAD]")
+        self.mask_token = self.tokenizer.mask_token
+        self.pad_token = self.tokenizer.pad_token
         # Check if truncate is true but truncate length has not been mentioned
         try:
             if self.config.truncate:
@@ -68,7 +68,7 @@ class ClozeDataset(Dataset):
         article = (
             data["article"].lower()
             + " "
-            + data["question"].lower().replace("@placeholder", "[MASK]")
+            + data["question"].lower().replace("@placeholder", self.mask_token)
         )
         article = self.tokenizer(
             article,
@@ -84,7 +84,7 @@ class ClozeDataset(Dataset):
             article["input_ids"] = article["input_ids"][-self.config.truncate_length :]
 
         # Saving the [MASK]'s index
-        answer_index = article["input_ids"].index(self.mask_id)
+        answer_index = article["input_ids"].index(self.mask_token)
 
         # Tokenizing Options
         options = [data["option_" + str(i)] for i in range(5)]
@@ -168,15 +168,15 @@ class ClozeDataset(Dataset):
         # Applying padding to articles relative to the batch
         for i in range(len(articles)):
 
-            articles[i] = articles[i] + [self.pad_id] * (max_len - len(articles[i]))
-            article_masks[i] = article_masks[i] + [self.pad_id] * (
+            articles[i] = articles[i] + [self.pad_token] * (max_len - len(articles[i]))
+            article_masks[i] = article_masks[i] + [self.pad_token] * (
                 max_len - len(article_masks[i])
             )
 
         # Applying padding to options relative to the batch
         for i in range(len(options)):
             for j in range(len(options[i])):
-                options[i][j] = options[i][j] + [self.pad_id] * (
+                options[i][j] = options[i][j] + [self.pad_token] * (
                     ops_max_len - len(options[i][j])
                 )
 
