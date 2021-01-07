@@ -128,6 +128,7 @@ class BaseTrainer:
             val_counter = 0
 
             for step, batch in enumerate(train_loader):
+                model.train()
                 optimizer.zero_grad()
                 inputs, labels = batch
                 labels = labels.float()
@@ -494,6 +495,7 @@ class BaseTrainer:
         batch_size = self.val_config.loader_params.batch_size
 
         with torch.no_grad():
+            model.eval()
             val_loss = 0
             for j, batch in enumerate(val_loader):
 
