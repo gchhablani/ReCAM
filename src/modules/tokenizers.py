@@ -4,7 +4,7 @@ import torch
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset
 from src.utils.mapper import configmapper
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, BertTokenizer
 
 
 class Tokenizer:
@@ -105,3 +105,5 @@ class GloveTokenizer(Tokenizer):
 class AutoTokenizer(AutoTokenizer):
     def __init__(self, *args):
         super(AutoTokenizer, self).__init__()
+
+configmapper.map("tokenizers","BertTokenizer")(BertTokenizer)
