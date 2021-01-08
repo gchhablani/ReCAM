@@ -17,7 +17,6 @@ def swish(x):
 ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
 
 
-
 class AlbertPreTrainedModel(PreTrainedModel):
     """
     An abstract class to handle weights initialization and a simple interface for downloading and loading pretrained
@@ -92,9 +91,7 @@ class AlbertLMPredictionHead(nn.Module):
             bias=False,
         )
         self.decoder.weight = albert_model_embedding_weights
-        self.bias = nn.Parameter(
-            torch.zeros(albert_model_embedding_weights.size(0))
-        )
+        self.bias = nn.Parameter(torch.zeros(albert_model_embedding_weights.size(0)))
 
     def forward(self, hidden_states):
         hidden_states = self.transform(hidden_states)
