@@ -20,7 +20,7 @@ ACT2FN = {"gelu": gelu, "relu": F.relu, "swish": swish}
 def process_options(options_tensor,func):
     single_option_shape = list(options_tensor.shape)
     single_option_shape[1]=1
-    return torch.cat([func(torch.gather(options_tensor,1,torch.ones(single_option_shape,dtype=torch.int64)*i)) for i in range(5)],dim=1)
+    return torch.cat([func(torch.gather(options_tensor,1,torch.ones(single_option_shape,dtype=torch.int64, device=options_tensor.device)*i)) for i in range(5)],dim=1)
 
 
 ##DERIVED FROM BASELINE
@@ -148,7 +148,7 @@ class BaselineOut(nn.Module):
 
         ## Get the context for answer indices
         ## CAN ALSO GET JUST THE FIRST OUTPUT
-        overall_question_context = torch.gather(question_contexts,1,torch.ones(single_question_context_shape,dtype=torch.int64)*answer_indices.reshape(-1,1,1)).squeeze(1)
+        overall_question_context = torch.gather(question_contexts,1,torch.ones(single_question_context_shape,dtype=torch.int64, device=question_contexts.device)*answer_indices.reshape(-1,1,1)).squeeze(1)
         article_question_attention = self.mlp_att(overall_question_context, article_contexts, article_contexts)
 
 #         print(article_question_attention.shape)
@@ -218,7 +218,7 @@ class ClozeStyleOut(nn.Module):
         ### CAN ALSO REPLACE WITH CODE IN LONGFORMERS_CLOZE
         single_question_context_shape = list(question_contexts.shape)
         single_question_context_shape[1] = 1
-        out = torch.gather(question_contexts,1,torch.ones(single_question_context_shape,dtype=torch.int64)*answer_indices.reshape(-1,1,1))
+        out = torch.gather(question_contexts,1,torch.ones(single_question_context_shape,dtype=torch.int64, device=question_contexts.device)*answer_indices.reshape(-1,1,1))
 
         out = self.cls(out)
 

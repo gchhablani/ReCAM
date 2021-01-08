@@ -3,25 +3,42 @@ version: 1.0
 main_config: &main
     seed: !!int 42
     metrics:
-
       - type: sklearn_f1
         params:
           average: macro
+          labels:
+            - !!int 0
+            - !!int 1
+            - !!int 2
+            - !!int 3
+            - !!int 4
 
       - type: sklearn_p
         params:
           average: macro
+          labels:
+            - !!int 0
+            - !!int 1
+            - !!int 2
+            - !!int 3
+            - !!int 4
 
       - type: sklearn_r
         params:
           average: macro
+          labels:
+            - !!int 0
+            - !!int 1
+            - !!int 2
+            - !!int 3
+            - !!int 4
 
       - type: sklearn_acc
         params:
-            normalize: True
+          normalize: true
 
     device:
-        name: 'cpu'
+        name: 'cuda'
 
 train: &train
     # Change to different value if not using max_steps
@@ -29,11 +46,11 @@ train: &train
     # Can add the max_epochs vs max_steps functionality
     label_type: long
     append_text: train
-    max_epochs: !!int 4
+    max_epochs: !!int 10
     loader_params:
-        batch_size: !!int 2
+        batch_size: !!int 8
         num_workers: !!int 4
-        shuffle: True
+        shuffle: true
 
     optimizer:
         type: adam_w
@@ -53,6 +70,7 @@ train: &train
       desired: min
       best_path: './ckpts/recam/train/best_{}.pth'
       final_path: './ckpts/recam/train/final_{}.pth'
+    save_after_epoch: false
 
 
     checkpoint:
@@ -65,7 +83,7 @@ train: &train
         log_interval: !!int 100 # Global Steps
         logger_params:
             model: gabertclozeqa
-            trainer: cloze
+            trainer: gabert
             comment: "Trial for Logger and Trainer"
             log_dir: './logs/recam/train'
         log_label: 1
@@ -79,7 +97,7 @@ val:
     append_text: val
     max_steps: null
     loader_params:
-        batch_size: !!int 4
+        batch_size: !!int 8
         num_workers: !!int 4
         shuffle: false
     # log:

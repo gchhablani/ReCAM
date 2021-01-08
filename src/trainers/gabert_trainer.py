@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 
 @configmapper.map("trainers", "gabert")
-class BaseTrainer:
+class GABertTrainer:
     def __init__(self, config):
         self._config = config
         self.metrics = {
@@ -119,7 +119,7 @@ class BaseTrainer:
             if(self.train_config.label_type=='float'):
                 all_labels = torch.FloatTensor().to(device)
             else:
-                all_labels = torch.Tensor().to(device)
+                all_labels = torch.LongTensor().to(device)
 
             all_outputs = torch.Tensor().to(device)
 
@@ -229,7 +229,7 @@ class BaseTrainer:
                     # print("\nLogging\n")
                     train_loss_name = self.train_config.criterion.type
                     metric_list = [
-                        metric(all_outputs.detach().cpu(), all_labels.cpu(), **self.metrics[metric])
+                        metric(all_labels.cpu(), all_outputs.detach().cpu(), **self.metrics[metric])
                         for metric in self.metrics
                     ]
                     metric_name_list = [
@@ -274,7 +274,7 @@ class BaseTrainer:
             # print("\nLogging\n")
             train_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu(),**self.metrics[metric])
+                metric(all_labels.cpu(), all_outputs.detach().cpu(),**self.metrics[metric])
                 for metric in self.metrics
             ]
             metric_name_list = [metric['type'] for metric in self._config.main_config.metrics]
@@ -369,10 +369,10 @@ class BaseTrainer:
         avg_loss = loss / divisor
 
         metric_list = [
-            metric(all_outputs.detach().cpu(), all_labels.cpu())
+            metric(all_labels.cpu(), all_outputs.detach().cpu(), **self.metrics[metric])
             for metric in self.metrics
         ]
-        metric_name_list = [metric for metric in self._config.main_config.metrics]
+        metric_name_list = [metric['type'] for metric in self._config.main_config.metrics]
 
         return dict(zip([loss_name,] + metric_name_list, [avg_loss,] + metric_list,))
 
@@ -506,7 +506,7 @@ class BaseTrainer:
         if(self.train_config.label_type=='float'):
             all_labels = torch.FloatTensor().to(device)
         else:
-            all_labels = torch.Tensor().to(device)
+            all_labels = torch.LongTensor().to(device)
 
         batch_size = self.val_config.loader_params.batch_size
 
@@ -529,13 +529,19 @@ class BaseTrainer:
                 val_loss += loss.item()
 
                 all_labels = torch.cat((all_labels, labels), 0)
-                all_outputs = torch.cat((all_outputs, outputs), 0)
+
+                if (self.train_config.label_type=='float'):
+                    all_outputs = torch.cat((all_outputs, outputs), 0)
+                else:
+                    all_outputs = torch.cat((all_outputs, torch.argmax(outputs, axis=1)), 0)
 
             val_loss = val_loss / len(val_loader)
 
             val_loss_name = self.train_config.criterion.type
+
+            # print(all_outputs, all_labels)
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu(), **self.metrics[metric])
+                metric(all_labels.cpu(), all_outputs.detach().cpu(), **self.metrics[metric])
                 for metric in self.metrics
             ]
             metric_name_list = [metric['type'] for metric in self._config.main_config.metrics]
