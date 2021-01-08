@@ -1,0 +1,4 @@
+name: gabertqa
+dropout: 0.2
+hidden_size: 768
+output_dim: 5

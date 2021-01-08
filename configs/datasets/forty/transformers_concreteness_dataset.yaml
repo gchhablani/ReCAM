@@ -8,7 +8,7 @@ main: &main
   text_cols: Word
   label_cols: Conc.M
   preprocessor:
-    name: transformersConcretenessPreprocessor
+    name: TransformersPreprocessor
     tokenizer:
       name: AutoTokenizer
       init_params:

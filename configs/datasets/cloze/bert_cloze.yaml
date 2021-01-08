@@ -3,7 +3,7 @@ main: &main
   data_dir: ./data/imperceptibility/
   truncate: True
   preprocessor:
-    name: clozePreprocessor
+    name: TransformersPreprocessor
     tokenizer:
       name: AutoTokenizer
       init_params:

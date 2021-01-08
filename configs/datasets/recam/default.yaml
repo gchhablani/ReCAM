@@ -1,0 +1,23 @@
+main: &main
+  name: recam
+  data_dir: ./data/train/
+  article_truncate_length: 512
+  question_truncate_length: 512
+  preprocessor:
+    name: GABertPreprocessor
+    tokenizer:
+      name: BertTokenizer
+      init_params:
+        pretrained_model_name_or_path: 'bert-base-uncased'
+
+train: &train
+  <<: *main
+  file_path: ./data/train/Task_1_train.jsonl
+  split: train
+
+val:
+  <<: *main
+  file_path: ./data/train/Task_1_dev.jsonl
+  split: val
+test:
+  <<: *main

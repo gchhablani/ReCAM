@@ -48,16 +48,16 @@ class GlovePreprocessor(Preprocessor):
         return model, train_dataset, val_dataset
 
 
-@configmapper.map("preprocessors", "clozePreprocessor")
-class ClozePreprocessor(Preprocessor):
-    """GlovePreprocessor."""
+@configmapper.map("preprocessors", "TransformersPreprocessor")
+class TransformersPreprocessor(Preprocessor):
+    """TransformersPreprocessor."""
 
     def __init__(self, config):
         """
         Args:
             config (src.utils.module.Config): configuration for preprocessor
         """
-        super(ClozePreprocessor, self).__init__()
+        super(TransformersPreprocessor, self).__init__()
         self.config = config
         self.tokenizer = configmapper.get_object(
             "tokenizers", self.config.main.preprocessor.tokenizer.name
@@ -78,17 +78,16 @@ class ClozePreprocessor(Preprocessor):
 
         return model, train_dataset, val_dataset
 
-
-@configmapper.map("preprocessors", "transformersConcretenessPreprocessor")
-class TransformersConcretenessPreprocessor(Preprocessor):
-    """BertConcretenessPreprocessor."""
+@configmapper.map("preprocessors", "GABertPreprocessor")
+class GABertPreprocessor(Preprocessor):
+    """GABertPreprocessor."""
 
     def __init__(self, config):
         """
         Args:
             config (src.utils.module.Config): configuration for preprocessor
         """
-        super(TransformersConcretenessPreprocessor, self).__init__()
+        super(GABertPreprocessor, self).__init__()
         self.config = config
         self.tokenizer = configmapper.get_object(
             "tokenizers", self.config.main.preprocessor.tokenizer.name
@@ -97,16 +96,12 @@ class TransformersConcretenessPreprocessor(Preprocessor):
         )
 
     def preprocess(self, model_config, data_config):
-
         train_dataset = configmapper.get_object("datasets", data_config.main.name)(
             data_config.train, self.tokenizer
         )
         val_dataset = configmapper.get_object("datasets", data_config.main.name)(
             data_config.val, self.tokenizer
         )
-
-        model = configmapper.get_object("models", model_config.name)(
-            **model_config.params.as_dict()
-        )
+        model = configmapper.get_object("models", model_config.name)(model_config)
 
         return model, train_dataset, val_dataset

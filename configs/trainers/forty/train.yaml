@@ -12,6 +12,7 @@ train: &train
     <<: *main
     # Can add the max_epochs vs max_steps functionality
     append_text: train
+    label_type: float
     max_epochs: !!int 10
     loader_params:
         batch_size: !!int 32
