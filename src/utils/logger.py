@@ -4,6 +4,7 @@ import torch
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
 from src.utils.configuration import *
+
 # from torchvision.utils import make_grid
 # from torchviz import make_dot
 
@@ -93,7 +94,7 @@ class Logger:
             if isinstance(hparam_list[i], dict):
                 hparam_list[i] = json.dumps(hparam_list[i])
             if type(hparam_list[i]) == Config:
-                hparam_list[i] =str(hparam_list[i].as_dict())
+                hparam_list[i] = str(hparam_list[i].as_dict())
             if hparam_list[i] is None:
                 hparam_list[i] = "None"
         print(hparam_list, hparam_name_list, metric_list, metric_name_list)
