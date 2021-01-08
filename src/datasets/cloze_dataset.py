@@ -68,7 +68,9 @@ class ClozeDataset(Dataset):
         article = (
             data["article"].lower()
             + " "
-            + data["question"].lower().replace("@placeholder", self.tokenizer.mask_token)
+            + data["question"]
+            .lower()
+            .replace("@placeholder", self.tokenizer.mask_token)
         )
         article = self.tokenizer(
             article,
