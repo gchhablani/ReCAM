@@ -100,14 +100,69 @@ val:
         batch_size: !!int 8
         num_workers: !!int 4
         shuffle: false
-    # log:
-    #     logger_params:
-    #         model: two_layer_nn
-    #         trainer: cloze
-    #         comment: "Trial for Logger and Trainer"
-    #         log_dir: './logs/cloze/eval'
-    #     log_label: 1
-    #     values:
-    #         loss: true
-    #         metrics: true
-            # hparams: true
+
+grid_search:
+  directory: null
+  hyperparams:
+    train:
+      max_epochs: !!int 10
+      optimizer:
+        type:
+          - adam_w
+          - adam
+        params:
+          lr:
+            - !!float 1e-5
+            - !!float 1e-6
+
+      scheduler:
+          - null
+          - type: cyclic
+            params:
+              base_lr: !!float 1e-7
+              max_lr: !!float 1e-3
+              step_size_up: !!int 100
+              step_size_down: !!int 200
+              mode: exp_range
+              cycle_momentum: false
+
+          - type: cosineannealrestart
+            params:
+              T_0: !!int 100
+              T_mult: !!int 2
+              eta_min: !!float 1e-9
+
+      log:
+        logger_params:
+          model: two_layer_nn
+          trainer: forty
+          comment: "GridSearch for Forty"
+          log_dir: './logs/gridsearch'
+        log_label: null
+        values:
+          hparams:  ## Can have lists inside hparams
+             - name: scheduler_type
+               path:
+                  - train
+                  - scheduler
+                  - type
+             - name: scheduler_params
+               path:
+                  - train
+                  - scheduler
+                  - params
+             - name: batch_size
+               path:
+                  - train
+                  - loader_params
+                  - batch_size
+             - name: optimizer_params
+               path:
+                 - train
+                 - optimizer
+                 - params
+             - name: optimizer_type
+               path:
+                 - train
+                 - optimizer
+                 - type
