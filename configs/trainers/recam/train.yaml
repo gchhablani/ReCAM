@@ -134,10 +134,10 @@ grid_search:
 
       log:
         logger_params:
-          model: two_layer_nn
-          trainer: forty
+          model: gabertclozeqa
+          trainer: gabert
           comment: "GridSearch for Forty"
-          log_dir: './logs/gridsearch'
+          log_dir: './logs/recam/gridsearch/'
         log_label: null
         values:
           hparams:  ## Can have lists inside hparams
