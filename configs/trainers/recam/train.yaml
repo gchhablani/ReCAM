@@ -84,7 +84,7 @@ train: &train
         logger_params:
             model: gabertclozeqa
             trainer: gabert
-            comment: "Trial for Logger and Trainer"
+            comment: "Training GABert ClozeQA"
             log_dir: './logs/recam/train'
         log_label: 1
         values:
@@ -110,10 +110,6 @@ grid_search:
         type:
           - adam_w
           - adam
-        params:
-          lr:
-            - !!float 1e-5
-            - !!float 1e-6
 
       scheduler:
           - null
@@ -121,14 +117,14 @@ grid_search:
             params:
               base_lr: !!float 1e-7
               max_lr: !!float 1e-3
-              step_size_up: !!int 100
-              step_size_down: !!int 200
+              step_size_up: !!int 20
+              step_size_down: !!int 40
               mode: exp_range
               cycle_momentum: false
 
           - type: cosineannealrestart
             params:
-              T_0: !!int 100
+              T_0: !!int 40
               T_mult: !!int 2
               eta_min: !!float 1e-9
 
@@ -136,7 +132,7 @@ grid_search:
         logger_params:
           model: gabertclozeqa
           trainer: gabert
-          comment: "GridSearch for Forty"
+          comment: "GridSearch for GABert"
           log_dir: './logs/recam/gridsearch/'
         log_label: null
         values:
