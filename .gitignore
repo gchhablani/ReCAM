@@ -11,3 +11,5 @@ build
 src.egg-info/SOURCES.txt
 src.egg-info/top_level.txt
 .vscode
+src/datasets/__pycache__/__init__.cpython-38.pyc
+src/modules/__pycache__/tokenizers.cpython-38.pyc

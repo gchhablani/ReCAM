@@ -110,3 +110,46 @@ class TransformersPreprocessor(Preprocessor):
         )
 
         return model, train_dataset, val_dataset
+
+
+@configmapper.map("preprocessors", "answerbertPreprocessor")
+class AnswerBertPreprocessor(Preprocessor):
+    """Implements AnswerBertPreprocessor.
+
+    Attrs:
+        config(src.utils.configuration.Config): The dataset config object containing the preprocessor details
+        tokenizer(src.modules.tokenizer.Tokenizer): The HuggingFace tokenizer to be used for dataset
+
+    Methods:
+        __init__(config): Initializes the object.
+        preprocessor(model_config,data_config): Takes in model_config, data_config and returns the model.
+    """
+
+    def __init__(self, config):
+        """Initializes the AnswerBertPreprocessor
+
+        Args:
+            config(src.utils.configuration.Config): The dataset config object containig the preprocessor details
+
+        """
+        super(AnswerBertPreprocessor, self).__init__()
+        self.config = config
+        self.tokenizer = configmapper.get_object(
+            "tokenizers", self.config.main.preprocessor.tokenizer.name
+        ).from_pretrained(
+            **self.config.main.preprocessor.tokenizer.init_params.as_dict()
+        )
+
+    def preprocess(self, model_config, data_config):
+
+        train_dataset = configmapper.get_object("datasets", data_config.main.name)(
+            data_config.train, self.tokenizer
+        )
+        val_dataset = configmapper.get_object("datasets", data_config.main.name)(
+            data_config.val, self.tokenizer
+        )
+        ## Can be integrated with the previous one using a variable.
+        model = configmapper.get_object("models", model_config.name)(
+            model_config.params
+        )
+        return model, train_dataset, val_dataset

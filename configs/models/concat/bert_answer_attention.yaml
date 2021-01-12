@@ -1,0 +1,4 @@
+name: answerbert
+params:
+  hidden_size: 768
+  dropout: 0.2
