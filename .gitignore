@@ -2,7 +2,12 @@
 embeddings/
 *ckpts*
 */__pycache__/*
-src.egg-info
+*src.egg-info*
+__pycache__
+src.egg-info/*
 dist
 build
 .idea
+src.egg-info/SOURCES.txt
+src.egg-info/top_level.txt
+.vscode
