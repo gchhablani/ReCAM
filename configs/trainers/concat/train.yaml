@@ -58,7 +58,7 @@ train: &train
     checkpoint:
         checkpoint_dir: './ckpts/concat/'
 
-    log_and_val_interval:  500 ## Set to null if using different val and log intervals, Overrides log_interval nd val_interval
+    log_and_val_interval:  50 ## Set to null if using different val and log intervals, Overrides log_interval nd val_interval
 
     val_interval:  500 # Global steps
     log:
