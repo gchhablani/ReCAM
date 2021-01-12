@@ -45,7 +45,6 @@ class MLPAttentionLogits(nn.Module):
 
         Q = Q.unsqueeze(1)  # [batch_size, 1, dim]
 
-        print(Q.shape, K.shape)
         M = self.dropout(Q * K)  # [batch_size, seq_len, dim]
         scores = self.dropout(self.linear(M))  # [batch_size, seq_len, 1]
 
@@ -126,7 +125,9 @@ class AnswerAttentionBert(nn.Module):
         ops_avg_embeddings = torch.cat(ops_avg_embeddings, dim=1)
 
         out_logits = self.attention(
-            mask_embedding.squeeze(), ops_avg_embeddings, ops_avg_embeddings
-        ).squeeze()
+            mask_embedding.squeeze(1), ops_avg_embeddings, ops_avg_embeddings
+        ).squeeze(
+            2
+        )  ##[batch_size,5]
 
         return out_logits

@@ -143,7 +143,7 @@ class BaseTrainer:
                     inputs[key] = inputs[key].to(device)
                 labels = labels.to(device)
                 outputs = model(inputs)
-                loss = criterion(torch.squeeze(outputs), labels)
+                loss = criterion(torch.squeeze(outputs, dim=1), labels)
                 loss.backward()
 
                 all_labels = torch.cat((all_labels, labels), 0)
@@ -564,7 +564,7 @@ class BaseTrainer:
                 labels = labels.to(device)
 
                 outputs = model(inputs)
-                loss = criterion(torch.squeeze(outputs), labels)
+                loss = criterion(torch.squeeze(outputs, dim=1), labels)
                 val_loss += loss.item()
 
                 all_labels = torch.cat((all_labels, labels), 0)
