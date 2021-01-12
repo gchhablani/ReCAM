@@ -3,11 +3,11 @@ main: &main
   data_dir: ./data/imperceptibility/
   truncate: True
   preprocessor:
-    name: clozePreprocessor
+    name: transformersPreprocessor
     tokenizer:
       name: AutoTokenizer
       init_params:
-        pretrained_model_name_or_path: 'distilbert-large-uncased'
+        pretrained_model_name_or_path: "distilbert-large-uncased"
 
 train: &train
   <<: *main
