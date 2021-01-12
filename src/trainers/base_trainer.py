@@ -20,10 +20,10 @@ from tqdm import tqdm
 class BaseTrainer:
     def __init__(self, config):
         self._config = config
-        self.metrics = [
-            configmapper.get_object("metrics", metric)
+        self.metrics = {
+            configmapper.get_object("metrics", metric["type"]): metric["params"]
             for metric in self._config.main_config.metrics
-        ]
+        }
         self.train_config = self._config.train
         self.val_config = self._config.val
         self.log_label = self.train_config.log.log_label
@@ -116,7 +116,11 @@ class BaseTrainer:
             train_loss = 0
             val_loss = 0
 
-            all_labels = torch.FloatTensor().to(device)
+            if(self.train_config.label_type=='float'):
+                all_labels = torch.FloatTensor().to(device)
+            else:
+                all_labels = torch.LongTensor().to(device)
+
             all_outputs = torch.Tensor().to(device)
 
             train_scores = None
@@ -131,7 +135,10 @@ class BaseTrainer:
                 model.train()
                 optimizer.zero_grad()
                 inputs, labels = batch
-                labels = labels.float()
+
+                if(self.train_config.label_type=='float'): ##Specific to Float Type
+                    labels = labels.float()
+
                 for key in inputs:
                     inputs[key] = inputs[key].to(device)
                 labels = labels.to(device)
@@ -140,7 +147,12 @@ class BaseTrainer:
                 loss.backward()
 
                 all_labels = torch.cat((all_labels, labels), 0)
-                all_outputs = torch.cat((all_outputs, outputs), 0)
+
+                if (self.train_config.label_type=='float'):
+                    all_outputs = torch.cat((all_outputs, outputs), 0)
+                else:
+                    all_outputs = torch.cat((all_outputs, torch.argmax(outputs, axis=1)), 0)
+
 
                 train_loss += loss.item()
                 optimizer.step()
@@ -173,6 +185,7 @@ class BaseTrainer:
                         train_log_values,
                     )
 
+                    #save_flag = 0
                     if self.train_config.save_on is not None:
 
                         ## BEST SCORES UPDATING
@@ -216,11 +229,11 @@ class BaseTrainer:
                     # print("\nLogging\n")
                     train_loss_name = self.train_config.criterion.type
                     metric_list = [
-                        metric(all_outputs.detach().cpu(), all_labels.cpu())
+                        metric(all_labels.cpu(), all_outputs.detach().cpu(), **self.metrics[metric])
                         for metric in self.metrics
                     ]
                     metric_name_list = [
-                        metric for metric in self._config.main_config.metrics
+                        metric['type'] for metric in self._config.main_config.metrics
                     ]
 
                     train_scores = self.log(
@@ -261,10 +274,10 @@ class BaseTrainer:
             # print("\nLogging\n")
             train_loss_name = self.train_config.criterion.type
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu())
+                metric(all_labels.cpu(), all_outputs.detach().cpu(),**self.metrics[metric])
                 for metric in self.metrics
             ]
-            metric_name_list = [metric for metric in self._config.main_config.metrics]
+            metric_name_list = [metric['type'] for metric in self._config.main_config.metrics]
 
             train_scores = self.log(
                 train_loss / len(train_loader),
@@ -356,10 +369,10 @@ class BaseTrainer:
         avg_loss = loss / divisor
 
         metric_list = [
-            metric(all_outputs.detach().cpu(), all_labels.cpu())
+            metric(all_labels.cpu(), all_outputs.detach().cpu(), **self.metrics[metric])
             for metric in self.metrics
         ]
-        metric_name_list = [metric for metric in self._config.main_config.metrics]
+        metric_name_list = [metric['type'] for metric in self._config.main_config.metrics]
 
         return dict(zip([loss_name,] + metric_name_list, [avg_loss,] + metric_list,))
 
@@ -490,7 +503,10 @@ class BaseTrainer:
             )
 
         all_outputs = torch.Tensor().to(device)
-        all_labels = torch.FloatTensor().to(device)
+        if(self.train_config.label_type=='float'):
+            all_labels = torch.FloatTensor().to(device)
+        else:
+            all_labels = torch.LongTensor().to(device)
 
         batch_size = self.val_config.loader_params.batch_size
 
@@ -500,7 +516,10 @@ class BaseTrainer:
             for j, batch in enumerate(val_loader):
 
                 inputs, labels = batch
-                labels = labels.float()
+
+                if(self.train_config.label_type=='float'):
+                    labels = labels.float()
+
                 for key in inputs:
                     inputs[key] = inputs[key].to(device)
                 labels = labels.to(device)
@@ -510,16 +529,22 @@ class BaseTrainer:
                 val_loss += loss.item()
 
                 all_labels = torch.cat((all_labels, labels), 0)
-                all_outputs = torch.cat((all_outputs, outputs), 0)
+
+                if (self.train_config.label_type=='float'):
+                    all_outputs = torch.cat((all_outputs, outputs), 0)
+                else:
+                    all_outputs = torch.cat((all_outputs, torch.argmax(outputs, axis=1)), 0)
 
             val_loss = val_loss / len(val_loader)
 
             val_loss_name = self.train_config.criterion.type
+
+            # print(all_outputs, all_labels)
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu())
+                metric(all_labels.cpu(), all_outputs.detach().cpu(), **self.metrics[metric])
                 for metric in self.metrics
             ]
-            metric_name_list = [metric for metric in self._config.main_config.metrics]
+            metric_name_list = [metric['type'] for metric in self._config.main_config.metrics]
             return_dic = dict(
                 zip([val_loss_name,] + metric_name_list, [val_loss,] + metric_list,)
             )
