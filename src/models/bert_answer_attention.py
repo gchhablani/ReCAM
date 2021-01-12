@@ -31,7 +31,6 @@ class MLPAttentionLogits(nn.Module):
 
         self.Q_W = Linear(dim, dim)
         self.K_W = Linear(dim, dim)
-        self.V_W = Linear(dim, dim)
 
         self.linear = Linear(dim, 1)
 
@@ -40,13 +39,13 @@ class MLPAttentionLogits(nn.Module):
     def forward(self, Q, K, V):
         # Q: [batch_size, dim]
         # K: [batch_size, seq_len, dim]
-        # V: [batch_size, seq_len, dim]
 
         Q = self.dropout(self.Q_W(Q))  # [batch_size, dim]
         K = self.dropout(self.K_W(K))  # [batch_size, seq_len, dim]
-        V = self.dropout(self.V_W(V))  # [batch_size, seq_len, dim]
 
         Q = Q.unsqueeze(1)  # [batch_size, 1, dim]
+
+        print(Q.shape, K.shape)
         M = self.dropout(Q * K)  # [batch_size, seq_len, dim]
         scores = self.dropout(self.linear(M))  # [batch_size, seq_len, 1]
 
