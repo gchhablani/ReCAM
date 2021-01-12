@@ -1,6 +1,6 @@
 """Implement Answer Attention BERT Model."""
 from torch import nn
-from transformers import BertPreTrainedModel, BertConfig
+from transformers import BertPreTrainedModel, BertConfig, BertModel
 from src.utils.mapper import configmapper
 import torch
 import torch.nn.functional as F
