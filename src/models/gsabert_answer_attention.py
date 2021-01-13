@@ -42,7 +42,7 @@ class MLPAttentionLogits(nn.Module):
 
 
 class GatedSelfAttention(nn.Module):
-    def forward(Q, K, V):
+    def forward(self, Q, K, V):
         ## Q: [batch_size,seq_length,dim]
         ## K: [batch_size,seq_length,dim]
         ## V: [batch_size,seq_length,dim]
