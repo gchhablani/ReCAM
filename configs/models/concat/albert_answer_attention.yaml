@@ -1,0 +1,5 @@
+name: answeralbert
+params:
+  hidden_size: 4096
+  dropout: 0.2
+  albert_pretrained_name: albert-base-v1
