@@ -1,0 +1,6 @@
+name: gsabert
+params:
+  hidden_size: 768
+  dropout: 0.2
+  bert_pretrained_name: bert-base-uncased
+  layers: 2

@@ -65,9 +65,9 @@ train: &train
     log:
         log_interval:  100 # Global Steps
         logger_params:
-            model: answerbert
+            model: gsamn_answer_att
             trainer: base
-            comment: "Train Logs for Answer Attention with Bert"
+            comment: "Train Logs for GSAM Attention with Bert"
             log_dir: './logs/concat/train'
         log_label: 1
         values:
