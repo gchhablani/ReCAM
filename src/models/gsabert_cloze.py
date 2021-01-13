@@ -126,7 +126,7 @@ class GSABertForCloze(BertPreTrainedModel):
 
     def __init__(self, config):
 
-        super(BertForCloze, self).__init__(config)
+        super(GSABertForCloze, self).__init__(config)
         self.bert = BertModel(config)
         self.cls = BertOnlyMLMHead(config, self.bert.embeddings.word_embeddings.weight)
         self.gsalayers = [
@@ -158,7 +158,12 @@ class GSABertForCloze(BertPreTrainedModel):
         Returns:
             x_output (torch.Tensor): The output regression scores for each option
         """
-        articles, articles_mask, ops, question_pos = x_input
+        articles, articles_mask, ops, question_pos = (
+            x_input["articles"],
+            x_input["article_attention_masks"],
+            x_input["options"],
+            x_input["answer_indices"],
+        )
         bsz = ops.size(0)
         ops = ops.reshape(bsz, 1, -1, 1)
 
