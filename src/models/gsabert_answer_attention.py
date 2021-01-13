@@ -75,7 +75,7 @@ class GSABert(nn.Module):
         super(GSABert, self).__init__()
         self.config = config
         self.bert = BertModel.from_pretrained(self.config.bert_pretrained_name)
-        self.gsabertlayers = [GatedSelfAttention() for i in config.layers]
+        self.gsabertlayers = [GatedSelfAttention() for i in range(config.layers)]
         self.mlpatt = MLPAttentionLogits(config.hidden_size, config.dropout)
 
     def forward(self, batch):
