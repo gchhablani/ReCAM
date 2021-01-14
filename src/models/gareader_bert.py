@@ -267,7 +267,7 @@ class GAReaderBert(nn.Module):
 
         for i in range(5):
             options_i = options[:, i, :]  ##batch_size,seq_length
-            options_i_embeds = self.bert(options_i)
+            options_i_embeds = self.dropout(self.bert(options_i)[0])
             options_i_out, _ = self.rnn(options_i_embeds)
             options_out.append(options_i_out)
 
@@ -310,7 +310,7 @@ class GAReaderBert(nn.Module):
             ATT_option_i = self.dropout(
                 self.dot_layer(ATT_article_question, options_out[i], options_out[i])
             )
-            ATT_option.append(ATT_option_I)
+            ATT_option.append(ATT_option_i)
 
         all_infomation = torch.cat(ATT_option, dim=1)
 
