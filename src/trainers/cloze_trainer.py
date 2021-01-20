@@ -278,6 +278,7 @@ class ClozeTrainer:
                 + str(epoch)
                 + ".pth",
             )
+            '''
             if epoch == max_epochs:
                 print("\nEvaluating\n")
                 val_scores = self.val(
@@ -438,7 +439,7 @@ class ClozeTrainer:
                     global_step,
                     append_text=self.train_config.append_text,
                 )
-
+            '''
     ## Need to check if we want same loggers of different loggers for train and eval
     ## Evaluate
 
@@ -541,9 +542,9 @@ class ClozeTrainer:
             val_loss = val_loss / len(val_loader)
 
             val_loss_name = self.train_config.criterion.type
-            outputs = torch.argmax(outputs, axis=1)
+            all_outputs = torch.argmax(all_outputs, axis=1)
             metric_list = [
-                metric(outputs.detach().cpu(), labels.cpu(), **self.metrics[metric])
+                metric(all_outputs.detach().cpu(), all_labels.cpu(), **self.metrics[metric])
                 for metric in self.metrics
             ]
             metric_name_list = [
