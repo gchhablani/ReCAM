@@ -32,15 +32,10 @@ class ClozeDataset(Dataset):
         self.config = config
         self.tokenizer = tokenizer
 
-        try:
-            if self.config.preprocessed == True:
-                self.data = torch.load(self.config.file_path)
-        except KeyError:
-            self.config.preprocessed = False
-            with open(self.config.file_path) as f:
-                self.data = [
-                    json.loads(datapoint) for datapoint in f.read().splitlines()
-                ]
+        with open(self.config.file_path) as f:
+            self.data = [
+                json.loads(datapoint) for datapoint in f.read().splitlines()
+            ]
 
         self.mask_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
         self.pad_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.pad_token)
@@ -123,10 +118,8 @@ class ClozeDataset(Dataset):
         """
 
         sample = []
-        if self.config.preprocessed == False:
-            datapoint = self._preprocess(self.data[idx])
-        else:
-            datapoint = self.data[idx]
+        datapoint = self._preprocess(self.data[idx])
+
         # Appending Article Input Ids
         sample.append(datapoint["article"]["input_ids"])
         # Appending Article Masks
