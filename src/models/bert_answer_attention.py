@@ -70,12 +70,8 @@ class AnswerAttentionBert(nn.Module):
         concats_attention_masks = batch[
             "concats_attention_masks"
         ]  # [batch_size, seq_length]
-        options_indices = batch[
-            "options_indices"
-        ]  # [batch_size, 5, max_options_length] May be padded using 1000000
-        options_attention_masks = batch[
-            "options_attention_masks"
-        ]  # [batch_size, 5, max_options_length]
+        options = batch["options"]
+        # ]  # [batch_size, 5, max_options_length]
 
         concat_embeddings = self.bert(
             input_ids=concats_token_ids,
@@ -90,44 +86,40 @@ class AnswerAttentionBert(nn.Module):
         answer_indices = answer_indices.reshape(-1, 1, 1).expand(
             batch_size, 1, hidden_size
         )  # [batch_size, 1, hidden_size]
-        mask_embedding = torch.gather(
-            concat_embeddings, 1, answer_indices
-        )  # [batch_size,1,768]
 
-        tokens_per_option_per_batch = torch.sum(
-            options_attention_masks, dim=2
-        )  ##[batch_size,5]
+        pad_token_id = self.config.pad_token_id
 
-        ops_avg_embeddings = []
+        options = options.reshape(batch_size, 1, 5, -1)
 
-        for i in range(5):
-            ops_i_indices = options_indices[:, i, :]  ## [batch_size,max_options_length]
-            ops_i_indices = ops_i_indices.reshape(batch_size, -1, 1).expand(
-                batch_size, -1, hidden_size
-            )  ##[batch_size,max_options_length,hidden_size]
-            ops_i_masks = (
-                options_attention_masks[:, i, :]
-                .reshape(batch_size, -1, 1)
-                .expand(batch_size, -1, hidden_size)
-            )  ##[batch_size,max_options_length,hidden_size]
-            ops_i_embeddings = torch.gather(
-                concat_embeddings, 1, ops_i_indices
-            )  ## [batch_size,max_options_length,hidden_size]
-            ops_i_embeddings = (
-                ops_i_masks * ops_i_embeddings
-            )  ## [batch_size,max_options_length,hidden_size]
-            ops_i_avg_embeddings = torch.sum(
-                ops_i_embeddings, dim=1
-            ) / tokens_per_option_per_batch[:, i].reshape(-1, 1).expand(
-                -1, hidden_size
-            )  ##[batch_size,hidden_size]
-            ops_avg_embeddings.append(ops_i_avg_embeddings.unsqueeze(1))
-        ops_avg_embeddings = torch.cat(ops_avg_embeddings, dim=1)
+        opnum = options.size(1)
+        out = self.bert(
+            concats_token_ids,
+            attention_mask=concats_attention_masks,
+            token_type_ids=concats_token_type_ids,
+            output_hidden_states=False,
+        ).last_hidden_state
 
-        out_logits = self.attention(
-            mask_embedding.squeeze(1), ops_avg_embeddings, ops_avg_embeddings
-        ).squeeze(
-            2
-        )  ##[batch_size,5]
+        answer_indices = answer_indices.reshape(-1, 1, 1)
+        answer_indices = answer_indices.expand(batch_size, opnum, out.size(-1))
+        out = torch.gather(out, 1, answer_indices)
+        out = self.cls(out)
+        # print(out.shape)
+        # convert ops to one hot
+        out = out.view(batch_size, opnum, 1, self.vocab_size)
+        out[:, :, :, pad_token_id] = 0
+        out = out.expand(batch_size, opnum, 5, self.vocab_size)
+        # print(out.shape)
+        out_tokens = torch.zeros((batch_size, opnum, 5, 1), device=options.device)
+        pad_tokens = options.shape[3] - torch.sum(
+            (options == pad_token_id), dim=3
+        ).unsqueeze(3)
 
-        return out_logits
+        for i in range(options.shape[3]):
+            ops_token = options[:, :, :, i].unsqueeze(3)
+            out_tokens += torch.gather(out, 3, ops_token)
+
+        out_tokens = torch.div(out_tokens, pad_tokens)
+        out = out_tokens
+        out = out.view(-1, 5)
+
+        return out
