@@ -67,7 +67,7 @@ class ConcatDataset(Dataset):
                 add_special_tokens=False,
                 verbose=False,
             )
-            options_tokenized.append(option)
+            options_tokenized.append(option["input_ids"])
 
         return_dic = {
             "concat_token_ids": truncated_concat_token_ids,
@@ -131,7 +131,7 @@ class ConcatDataset(Dataset):
                 max_concat_len - len(concat_token_type_ids[i])
             )
             for j in range(len(options[i])):
-                options[i][j] = options[i][j] + [self.pad_id] * (
+                options[i][j] = options[i][j] + [self.pad_token_id] * (
                     max_options_len - len(options[i][j])
                 )
             ##Setting Pad Token Type Id To 0

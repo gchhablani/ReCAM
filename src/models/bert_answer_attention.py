@@ -1,54 +1,91 @@
 """Implement Answer Attention BERT Model."""
-from torch import nn
-from transformers import BertPreTrainedModel, BertConfig, BertModel
-from src.utils.mapper import configmapper
+"""Implements Bert Cloze Style Question Answering"""
 import torch
-import torch.nn.functional as F
+import math
+import torch.nn as nn
+from src.utils.mapper import configmapper
+from transformers import BertConfig, BertModel, BertPreTrainedModel
 
 
-class Linear(nn.Module):
-    def __init__(self, in_features, out_features):
-        super(Linear, self).__init__()
+def gelu(x):
+    return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
-        self.linear = nn.Linear(in_features=in_features, out_features=out_features)
-        self.init_params()
 
-    def init_params(self):
-        nn.init.kaiming_normal_(self.linear.weight.data)
-        nn.init.constant_(self.linear.bias.data, 0)
+def swish(x):
+    return x * torch.sigmoid(x)
+
+
+ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
+
+
+class BertLayerNorm(nn.Module):
+    def __init__(self, config, variance_epsilon=1e-12):
+        """
+        Construct a layernorm module in the TF style (epsilon inside the square root).
+        """
+        super(BertLayerNorm, self).__init__()
+        self.gamma = nn.Parameter(torch.ones(config.hidden_size))
+        self.beta = nn.Parameter(torch.zeros(config.hidden_size))
+        self.variance_epsilon = variance_epsilon
 
     def forward(self, x):
+        u = x.mean(-1, keepdim=True)
+        s = (x - u).pow(2).mean(-1, keepdim=True)
+        x = (x - u) / torch.sqrt(s + self.variance_epsilon)
+        return self.gamma * x + self.beta
 
-        # x: [batch_size, seq_len, in_features]
-        x = self.linear(x)
-        # x: [batch_size, seq_len, out_features]
-        return x
+
+class BertPredictionHeadTransform(nn.Module):
+    def __init__(self, config):
+        super(BertPredictionHeadTransform, self).__init__()
+        self.dense = nn.Linear(config.hidden_size, config.hidden_size)
+        self.transform_act_fn = (
+            ACT2FN[config.hidden_act]
+            if isinstance(config.hidden_act, str)
+            else config.hidden_act
+        )
+        self.LayerNorm = BertLayerNorm(config)
+
+    def forward(self, hidden_states):
+        # print(hidden_states)
+        hidden_states = self.dense(hidden_states)
+        # print(hidden_states)
+        # exit()
+        hidden_states = self.transform_act_fn(hidden_states)
+        hidden_states = self.LayerNorm(hidden_states)
+        return hidden_states
 
 
-class MLPAttentionLogits(nn.Module):
-    def __init__(self, dim, dropout):
-        super(MLPAttentionLogits, self).__init__()
+class BertLMPredictionHead(nn.Module):
+    def __init__(self, config, bert_model_embedding_weights):
+        super(BertLMPredictionHead, self).__init__()
+        self.transform = BertPredictionHeadTransform(config)
 
-        self.Q_W = Linear(dim, dim)
-        self.K_W = Linear(dim, dim)
+        # The output weights are the same as the input embeddings, but there is
+        # an output-only bias for each token.
+        self.decoder = nn.Linear(
+            bert_model_embedding_weights.size(1),
+            bert_model_embedding_weights.size(0),
+            bias=False,
+        )
+        self.decoder.weight = bert_model_embedding_weights
+        self.bias = nn.Parameter(torch.zeros(bert_model_embedding_weights.size(0)))
 
-        self.linear = Linear(dim, 1)
+    def forward(self, hidden_states):
+        hidden_states = self.transform(hidden_states)
 
-        self.dropout = nn.Dropout(dropout)
+        hidden_states = self.decoder(hidden_states) + self.bias
+        return hidden_states
 
-    def forward(self, Q, K, V):
-        # Q: [batch_size, dim]
-        # K: [batch_size, seq_len, dim]
 
-        Q = self.dropout(self.Q_W(Q))  # [batch_size, dim]
-        K = self.dropout(self.K_W(K))  # [batch_size, seq_len, dim]
+class BertOnlyMLMHead(nn.Module):
+    def __init__(self, config, bert_model_embedding_weights):
+        super(BertOnlyMLMHead, self).__init__()
+        self.predictions = BertLMPredictionHead(config, bert_model_embedding_weights)
 
-        Q = Q.unsqueeze(1)  # [batch_size, 1, dim]
-
-        M = self.dropout(Q * K)  # [batch_size, seq_len, dim]
-        scores = self.dropout(self.linear(M))  # [batch_size, seq_len, 1]
-
-        return scores
+    def forward(self, sequence_output):
+        prediction_scores = self.predictions(sequence_output)
+        return prediction_scores
 
 
 @configmapper.map("models", "answerbert")
@@ -57,9 +94,11 @@ class AnswerAttentionBert(nn.Module):
         super(AnswerAttentionBert, self).__init__()
         self.config = config
         self.bert = BertModel.from_pretrained(self.config.bert_pretrained_name)
-        self.attention = MLPAttentionLogits(
-            self.config.hidden_size, self.config.dropout
+        bert_config = BertConfig.from_pretrained(self.config.bert_pretrained_name)
+        self.cls = BertOnlyMLMHead(
+            bert_config, self.bert.embeddings.word_embeddings.weight
         )
+        self.vocab_size = self.bert.embeddings.word_embeddings.weight.size(0)
 
     def forward(self, batch):
         concats_token_ids = batch["concats_token_ids"]  # [batch_size,seq_length]
@@ -83,11 +122,7 @@ class AnswerAttentionBert(nn.Module):
 
         batch_size = answer_indices.shape[0]
         hidden_size = concat_embeddings.shape[-1]
-        answer_indices = answer_indices.reshape(-1, 1, 1).expand(
-            batch_size, 1, hidden_size
-        )  # [batch_size, 1, hidden_size]
-
-        pad_token_id = self.config.pad_token_id
+        pad_token_id = 0
 
         options = options.reshape(batch_size, 1, 5, -1)
 
