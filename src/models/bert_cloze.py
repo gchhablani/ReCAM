@@ -101,7 +101,7 @@ class BertForCloze(BertPreTrainedModel):
     def __init__(self, config):
 
         super(BertForCloze, self).__init__(config)
-        # self.bert = BertModel(config)
+        self.bert = BertModel(config)
         # freeze_layers = [i for i in range(22)]
         # self.bert = self.freeze_bert_fn(self.bert,freeze_layers)
         # self.dropout_layer = nn.Dropout(0.3)
