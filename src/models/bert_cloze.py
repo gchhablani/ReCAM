@@ -38,6 +38,8 @@ class BertPredictionHeadTransform(nn.Module):
     def __init__(self, config):
         super(BertPredictionHeadTransform, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
+        # self.dense2 = nn.Linear(config.hidden_size, config.hidden_size)
+
         self.transform_act_fn = (
             ACT2FN[config.hidden_act]
             if isinstance(config.hidden_act, str)
@@ -48,6 +50,7 @@ class BertPredictionHeadTransform(nn.Module):
     def forward(self, hidden_states):
         # print(hidden_states)
         hidden_states = self.dense(hidden_states)
+        # hidden_states =  self.dense2(hidden_states)
         # print(hidden_states)
         # exit()
         hidden_states = self.transform_act_fn(hidden_states)
@@ -99,9 +102,45 @@ class BertForCloze(BertPreTrainedModel):
 
         super(BertForCloze, self).__init__(config)
         self.bert = BertModel(config)
+        freeze_layers = [i for i in range(22)]
+        # self.bert = self.freeze_bert_fn(self.bert,freeze_layers)
+        # self.dropout_layer = nn.Dropout(0.3)
         self.cls = BertOnlyMLMHead(config, self.bert.embeddings.word_embeddings.weight)
         self.init_weights(self.cls)
         self.vocab_size = self.bert.embeddings.word_embeddings.weight.size(0)
+
+    def freeze_bert_fn(
+        self,
+        model,
+        freeze_layers=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        freeze_embeddings=True,
+    ):
+
+        """
+        Returns the model with the top "freeze_layers" layers frozen.
+
+        Args:
+            model (transformers.models.bert.modeling_bert.BertForSequenceClassification): model whose layers are to be frozen
+            freeze_layers (list): The layers to be frozen
+            freeze_embeddings (boolean)
+
+        Returns:
+            model (transformers.models.bert.modeling_bert.BertForSequenceClassification) with frozen layers
+        """
+
+        if freeze_embeddings:
+            for param in list(model.embeddings.word_embeddings.parameters()):
+                param.requires_grad = False
+            print("Froze Embedding Layer")
+
+        if len(freeze_layers) != 0:
+            layer_indices = freeze_layers
+            for layer_idx in layer_indices:
+                for param in list(model.encoder.layer[layer_idx].parameters()):
+                    param.requires_grad = False
+                print("Froze Layer: ", layer_idx)
+
+        return model
 
     def init_weights(self, module):
 
@@ -138,6 +177,7 @@ class BertForCloze(BertPreTrainedModel):
         question_pos = question_pos.reshape(-1, 1, 1)
         question_pos = question_pos.expand(bsz, opnum, out.size(-1))
         out = torch.gather(out, 1, question_pos)
+        # out = self.dropout_layer(out)
         out = self.cls(out)
 
         # convert ops to one hot
