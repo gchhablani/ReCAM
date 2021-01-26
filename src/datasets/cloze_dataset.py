@@ -33,9 +33,7 @@ class ClozeDataset(Dataset):
         self.tokenizer = tokenizer
 
         with open(self.config.file_path) as f:
-            self.data = [
-                json.loads(datapoint) for datapoint in f.read().splitlines()
-            ]
+            self.data = [json.loads(datapoint) for datapoint in f.read().splitlines()]
 
         self.mask_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
         self.pad_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.pad_token)
@@ -60,28 +58,49 @@ class ClozeDataset(Dataset):
         """
         Helper Function To preprocess each datapoint before __get_item__ for jsonl files
         """
-        article = (
-            data["article"].lower()
-            + " "
-            + data["question"]
-            .lower()
-            .replace("@placeholder", self.tokenizer.mask_token)
-        )
-        article = self.tokenizer(
-            article,
-            return_token_type_ids=False,
-            return_attention_mask=False,
-            verbose=False,
-        )
 
-        if (
-            self.config.truncate
-            and len(article["input_ids"]) > self.config.truncate_length
-        ):
-            article["input_ids"] = article["input_ids"][-self.config.truncate_length :]
+        question_tokens = self.tokenizer(
+            data["question"].replace("@placeholder", self.tokenizer.mask_token),
+            add_special_tokens=False,
+        )["input_ids"]
+        article_tokens = self.tokenizer(data["article"], add_special_tokens=False)[
+            "input_ids"
+        ]
+
+        if len(article_tokens) + len(question_tokens) + 1 > 512:
+            remaining_length = self.config.truncate_length - len(question_tokens) - 1
+
+            mask = [0 for i in range(len(article_tokens))]
+
+            for i in range(len(article_tokens)):
+                if article_tokens[i] in question_tokens:
+                    mask[i] += 1
+
+            max_context_index = 0
+            min_context = np.inf
+            for i in range(len(article_tokens)):
+                curr_context = min(
+                    np.sum(article_tokens[:i]), np.sum(article_tokens[i:])
+                )
+                if curr_context < min_context:
+                    min_context = curr_context
+                    max_context_index = i
+            truncated_tokens = (
+                article_tokens[
+                    max_context_index
+                    - remaining_length // 2 : max_context_index
+                    + remaining_length // 2
+                ]
+                + [self.tokenizer.sep_token_id]
+                + question_tokens
+            )
+        else:
+            truncated_tokens = (
+                article_tokens + [self.tokenizer.sep_token_id] + question_tokens
+            )
 
         # Saving the [MASK]'s index
-        answer_index = article["input_ids"].index(self.mask_id)
+        answer_index = truncated_tokens.index(self.mask_id)
 
         # Tokenizing Options
         options = [data["option_" + str(i)] for i in range(5)]
@@ -93,7 +112,7 @@ class ClozeDataset(Dataset):
                 return_attention_mask=False,
                 add_special_tokens=False,
                 verbose=False,
-            )
+            )["input_ids"]
             options_tokenized.append(option)
 
         # Storing Answer
@@ -101,7 +120,7 @@ class ClozeDataset(Dataset):
         answer = data["label"]
 
         return {
-            "article": article,
+            "article": truncated_tokens,
             "answer_index": answer_index,
             "options": options_tokenized,
             "answer": answer,
@@ -121,13 +140,13 @@ class ClozeDataset(Dataset):
         datapoint = self._preprocess(self.data[idx])
 
         # Appending Article Input Ids
-        sample.append(datapoint["article"]["input_ids"])
+        sample.append(datapoint["article"])
         # Appending Article Masks
-        sample.append([1] * (len(datapoint["article"]["input_ids"])))
+        sample.append([1] * (len(datapoint["article"])))
 
         options = []
         for i in range(5):
-            options.append(datapoint["options"][i]["input_ids"])
+            options.append(datapoint["options"][i])
         # Appending options input ids *WITH* CLS and SEP
         sample.append(options)
         # Appending Placeholder's index from the article
