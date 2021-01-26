@@ -67,8 +67,8 @@ class ClozeDataset(Dataset):
             "input_ids"
         ]
 
-        if len(article_tokens) + len(question_tokens) + 1 > 512:
-            remaining_length = self.config.truncate_length - len(question_tokens) - 1
+        if len(article_tokens) + len(question_tokens) + 3 > 512:
+            remaining_length = self.config.truncate_length - len(question_tokens) - 3
 
             mask = [0 for i in range(len(article_tokens))]
 
@@ -77,26 +77,30 @@ class ClozeDataset(Dataset):
                     mask[i] += 1
 
             max_context_index = 0
-            min_context = np.inf
+            min_context = -np.inf
             for i in range(len(article_tokens)):
-                curr_context = min(
-                    np.sum(article_tokens[:i]), np.sum(article_tokens[i:])
-                )
-                if curr_context < min_context:
+                curr_context = min(np.sum(mask[:i]), np.sum(mask[i:]))
+                if curr_context > min_context:
                     min_context = curr_context
                     max_context_index = i
             truncated_tokens = (
-                article_tokens[
+                [self.tokenizer.cls_token_id]
+                + article_tokens[
                     max_context_index
                     - remaining_length // 2 : max_context_index
                     + remaining_length // 2
                 ]
                 + [self.tokenizer.sep_token_id]
                 + question_tokens
+                + [self.tokenizer.sep_token_id]
             )
         else:
             truncated_tokens = (
-                article_tokens + [self.tokenizer.sep_token_id] + question_tokens
+                [self.tokenizer.cls_token_id]
+                + article_tokens
+                + [self.tokenizer.sep_token_id]
+                + question_tokens
+                + [self.tokenizer.sep_token_id]
             )
 
         # Saving the [MASK]'s index
