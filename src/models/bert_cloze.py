@@ -101,8 +101,8 @@ class BertForCloze(BertPreTrainedModel):
     def __init__(self, config):
 
         super(BertForCloze, self).__init__(config)
-        self.bert = BertModel(config)
-        freeze_layers = [i for i in range(22)]
+        # self.bert = BertModel(config)
+        # freeze_layers = [i for i in range(22)]
         # self.bert = self.freeze_bert_fn(self.bert,freeze_layers)
         # self.dropout_layer = nn.Dropout(0.3)
         self.cls = BertOnlyMLMHead(config, self.bert.embeddings.word_embeddings.weight)
@@ -165,9 +165,37 @@ class BertForCloze(BertPreTrainedModel):
         Returns:
             x_output (torch.Tensor): The output regression scores for each option
         """
+
+
+        # articles, articles_mask, ops, question_pos = x_input
+        # bsz = ops.size(0)
+        # ops = ops.reshape(bsz, 1, -1, 1)
+
+        # opnum = ops.size(1)
+        # out = self.bert(
+        #     articles, attention_mask=articles_mask, output_hidden_states=False
+        # ).last_hidden_state
+
+        # question_pos = question_pos.reshape(-1, 1, 1)
+        # question_pos = question_pos.expand(bsz, opnum, out.size(-1))
+        # out = torch.gather(out, 1, question_pos)
+        # out = self.dropout_layer(out)
+        # out = self.cls(out)
+
+        # # convert ops to one hot
+        # out = out.view(bsz, opnum, 1, self.vocab_size)
+        # out = out.expand(bsz, opnum, 5, self.vocab_size)
+        # out = torch.gather(out, 3, ops)
+
+        # out = out.view(-1, 5)
+
+        # return out
+
+        pad_token_id = self.config.pad_token_id
         articles, articles_mask, ops, question_pos = x_input
+        # print(ops.device)
         bsz = ops.size(0)
-        ops = ops.reshape(bsz, 1, -1, 1)
+        ops = ops.reshape(bsz, 1, 5, -1)
 
         opnum = ops.size(1)
         out = self.bert(
@@ -177,14 +205,24 @@ class BertForCloze(BertPreTrainedModel):
         question_pos = question_pos.reshape(-1, 1, 1)
         question_pos = question_pos.expand(bsz, opnum, out.size(-1))
         out = torch.gather(out, 1, question_pos)
+
         # out = self.dropout_layer(out)
         out = self.cls(out)
-
+        # print(out.shape)
         # convert ops to one hot
         out = out.view(bsz, opnum, 1, self.vocab_size)
+        out[:, :, :, pad_token_id] = 0
         out = out.expand(bsz, opnum, 5, self.vocab_size)
-        out = torch.gather(out, 3, ops)
+        # print(out.shape)
+        out_tokens = torch.zeros((bsz, opnum, 5, 1), device=ops.device)
+        pad_tokens = ops.shape[3] - torch.sum((ops == pad_token_id), dim=3).unsqueeze(3)
 
+        for i in range(ops.shape[3]):
+            ops_token = ops[:, :, :, i].unsqueeze(3)
+            out_tokens += torch.gather(out, 3, ops_token)
+
+        out_tokens = torch.div(out_tokens, pad_tokens)
+        out = out_tokens
         out = out.view(-1, 5)
-
+        # print(out.shape)
         return out
