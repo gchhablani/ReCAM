@@ -5,6 +5,9 @@ from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
 import json
 from src.utils.mapper import configmapper
+from nltk.corpus import stopwords
+
+stopword_list = stopwords.word("english")
 
 
 @configmapper.map("datasets", "maxcloze")
@@ -73,7 +76,10 @@ class ClozeDataset(Dataset):
             mask = [0 for i in range(len(article_tokens))]
 
             for i in range(len(article_tokens)):
-                if article_tokens[i] in question_tokens:
+                if (
+                    article_tokens[i] in question_tokens
+                    and article_tokens[i] in stopword_list
+                ):
                     mask[i] += 1
 
             max_context_index = 0
