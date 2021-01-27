@@ -5,9 +5,12 @@ from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
 import json
 from src.utils.mapper import configmapper
+import nltk
+
+nltk.download("stopwords")
 from nltk.corpus import stopwords
 
-stopword_list = stopwords.word("english")
+stopword_list = stopwords.words("english")
 
 
 @configmapper.map("datasets", "maxcloze")
