@@ -33,9 +33,7 @@ class ClozeDataset(Dataset):
         self.tokenizer = tokenizer
 
         with open(self.config.file_path) as f:
-            self.data = [
-                json.loads(datapoint) for datapoint in f.read().splitlines()
-            ]
+            self.data = [json.loads(datapoint) for datapoint in f.read().splitlines()]
 
         self.mask_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
         self.pad_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.pad_token)
