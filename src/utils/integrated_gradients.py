@@ -6,11 +6,13 @@ import numpy as np
 from captum.attr import IntegratedGradients
 from datasets import Dataset
 import json
+from torch.utils.data import Dataset, DataLoader
 
 import torch
 import torch.nn.functional as F
 from tqdm.auto import tqdm
 
+import tensorflow as tf
 
 class MyIntegratedGradients:
     def __init__(self, config, model, dataset, tokenizer):
@@ -36,7 +38,9 @@ class MyIntegratedGradients:
         ops = ops.reshape(bsz, 1, 5, -1)
 
         opnum = ops.size(1)
-        out = self.model.bert.encoder(hidden_states, attention_masks, return_dict=None)[
+        # print(hidden_states.shape,attention_masks.shape)
+        extended_attention_masks = torch.tensor(self.get_extended_attention_mask(attention_masks, hidden_states.shape[0:2],'float32').cpu().numpy()).cuda()
+        out = self.model.bert.encoder(hidden_states, extended_attention_masks, return_dict=None)[
             0
         ]
         question_pos = question_pos.reshape(-1, 1, 1)
@@ -164,6 +168,7 @@ class MyIntegratedGradients:
                     ]
 
             else:
+                # print(offset_mapping,'\n',i)
                 word_wise_importances.append(per_example_token_wise_importances[i])
                 word_wise_offsets.append(offset_mapping[i])
                 words.append(
@@ -191,16 +196,20 @@ class MyIntegratedGradients:
         overall_word_importances = []
         overall_token_importances = []
 
-        for batch_idx in tqdm(range(0, len(examples), self.config.internal_batch_size)):
-            batch = examples[batch_idx : batch_idx + self.config.internal_batch_size]
-            columns = ["input_ids", "attention_mask", "ops", "question_pos"]
-
-            for key in columns:
-                batch[key] = torch.tensor(
-                    batch[key], device=torch.device(self.config.device)
+        dataloader = DataLoader(examples,collate_fn = examples.custom_collate_fn,batch_size = self.config.internal_batch_size, shuffle = False)
+        # for batch_idx in tqdm(range(0, len(examples), self.config.internal_batch_size)):
+        idx_for_original_samples = 0
+        for inputs in tqdm(dataloader):
+            # batch = examples[batch_idx : batch_idx + self.config.internal_batch_size]
+            columns = ["input_ids", "attention_mask", "ops", "question_pos","offset_mapping"]
+            batch = {}
+            for index in range(len(columns)):
+                batch[columns[index]] = torch.tensor(
+                    inputs[index], device=torch.device(self.config.device)
                 )
-
+            # print(batch["offset_mapping"])
             embedding_outputs = self.get_embedding_outputs(batch["input_ids"])
+            # print(embedding_outputs.shape)
             logits = self.get_model_outputs(
                 embedding_outputs,
                 batch["attention_mask"],
@@ -233,10 +242,11 @@ class MyIntegratedGradients:
                 token_importances[-1].append(token_wise_importances)
 
                 text = (
-                    self.original_data[example_index]["article"]
+                    self.original_data[idx_for_original_samples]["article"]
                     + " "
-                    + self.original_data[example_index]["question"]
+                    + self.original_data[idx_for_original_samples]["question"].replace("@placeholder","[MASK]")
                 )
+                # print(text)
                 offset_mapping = batch["offset_mapping"][example_index]
                 word_wise_importances = self.get_word_wise_importances(
                     input_ids,
@@ -245,7 +255,7 @@ class MyIntegratedGradients:
                     text,
                 )
                 word_importances[-1].append(word_wise_importances)
-
+                idx_for_original_samples += 1
             overall_word_importances.append(word_importances)
             overall_token_importances.append(token_importances)
         return {
@@ -310,3 +320,16 @@ class MyIntegratedGradients:
         token_importances = self.rearrange_importances(importances["token_importances"])
 
         return self.dataset, word_importances, token_importances
+
+
+    def get_extended_attention_mask(self, attention_mask, input_shape,dtype):
+        attention_mask = attention_mask.cpu()
+        if attention_mask is None:
+            attention_mask = tf.fill(input_shape, 1)
+
+        extended_attention_mask = tf.reshape(attention_mask, (input_shape[0], 1, 1, input_shape[1]))
+        
+        extended_attention_mask = tf.cast(extended_attention_mask,dtype)
+        extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
+
+        return extended_attention_mask

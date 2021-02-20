@@ -71,6 +71,7 @@ data_config = Config(path=args.data)
 # verbose = args.verbose
 
 # Preprocessor, Dataset, Model
+
 preprocessor = configmapper.get_object(
     "preprocessors", data_config.main.preprocessor.name
 )(data_config)
@@ -78,10 +79,12 @@ preprocessor = configmapper.get_object(
 
 model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
-tokenizer = configmapper.get_object("tokenizers", (ig_config.checkpoint_path))
-model = configmapper.get_object("models", model_config.name).from_pretrained(
-    ig_config.checkpoint_path
-)
+tokenizer = AutoTokenizer.from_pretrained(model_config.params.pretrained_model_name_or_path)
+# model = configmapper.get_object("models", model_config.name).from_pretrained(
+#     'bert-large-uncased'
+# )
+model.load_state_dict(torch.load(ig_config.checkpoint_path))
+
 # Initialize BertIntegratedGradients
 big = MyIntegratedGradients(ig_config, model, val_data, tokenizer)
 
@@ -90,13 +93,13 @@ print("### Running IG ###")
     samples,
     word_importances,
     token_importances,
-) = big.get_random_samples_and_importances_across_all_layers(
-    n_samples=ig_config.n_samples
+) = big.get_all_importances(
 )
 
 print("### Saving the Scores ###")
-with open(os.path.join(ig_config.store_dir, "samples"), "wb") as out_file:
-    pkl.dump(samples, out_file)
+# print(samples)
+# with open(os.path.join(ig_config.store_dir, "samples"), "wb") as out_file:
+#     pkl.dump(samples, out_file)
 with open(os.path.join(ig_config.store_dir, "token_importances"), "wb") as out_file:
     pkl.dump(token_importances, out_file)
 with open(os.path.join(ig_config.store_dir, "word_importances"), "wb") as out_file:
