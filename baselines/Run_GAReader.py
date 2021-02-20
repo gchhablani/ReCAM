@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 
-sys.path.append(
-    "/media/crocoder/New Volume/Personal/Projects/Task-4/SemEval2021-Reading-Comprehension-of-Abstract-Meaning/"
-)
 import random
 import time
 import numpy as np
@@ -20,13 +17,13 @@ from torchtext import data
 from torchtext import datasets
 from torchtext import vocab
 
-from Baselines.Utils.utils import (
+from baselines.utils.utils import (
     word_tokenize,
     get_device,
     epoch_time,
     classifiction_metric,
 )
-from Baselines.Utils.arc_embedding_utils import load_data
+from baselines.utils.arc_embedding_utils import load_data
 
 
 def train(
@@ -204,7 +201,7 @@ def main(config, model_filename):
     word_emb = text_field.vocab.vectors
 
     if config.model_name == "GAReader":
-        from Baselines.GAReader.GAReader import GAReader
+        from baselines.GAReader.GAReader import GAReader
 
         model = GAReader(
             config.glove_word_dim,
@@ -253,7 +250,7 @@ if __name__ == "__main__":
 
     model_name = "GAReader"
     data_dir = "./data/training_data"
-    embedding_folder = "./Baselines/embeddings/"  ##
+    embedding_folder = "./baselines/embeddings/"  ##
 
     output_dir = "./ga/output"
     cache_dir = "./ga/cache"
@@ -262,7 +259,7 @@ if __name__ == "__main__":
     model_filename = "model_adam1.pt"
 
     if model_name == "GAReader":
-        from Baselines.GAReader import args, GAReader
+        from baselines.GAReader import args, GAReader
 
         main(
             args.get_args(data_dir, cache_dir, embedding_folder, output_dir, log_dir),

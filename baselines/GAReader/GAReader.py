@@ -4,9 +4,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-from Baselines.Models.UnOrderedLSTM import LSTM
-from Baselines.Models.Linear import Linear
-from Baselines.Models.MLPAttention import MLPAttention
+from baselines.models.UnOrderedLSTM import LSTM
+from baselines.models.Linear import Linear
+from baselines.models.MLPAttention import MLPAttention
 
 
 def gated_attention(article, question):
