@@ -156,6 +156,7 @@ def evaluate(model, iterator, criterion, label_list):
 
 
 def main(config, model_filename):
+    print("LEARNING RATE: ", config.lr)
     if not os.path.exists(config.output_dir):
         os.makedirs(config.output_dir)
 
@@ -248,23 +249,20 @@ def main(config, model_filename):
 
 if __name__ == "__main__":
 
-    lrs = [1e-3, 1e-4, 1e-5, 1e-6]
 
-    for k, lr in enumerate(lrs):
-        model_name = "GAReader"
-        data_dir = "./data/imperceptibility/training_data"
-        embedding_folder = "./baselines/embeddings/"  ##
+    model_name = "GAReader"
+    data_dir = "./data/imperceptibility/training_data"
+    embedding_folder = "./baselines/embeddings/"  ##
 
-        output_dir = "./ga/output_" + str(k)
-        cache_dir = "./ga/cache_" + str(k)
-        log_dir = "./ga/log_" + str(k)
+    output_dir = "./ga/output"
+    cache_dir = "./ga/cache"
+    log_dir = "./ga/log"
 
-        model_filename = "model_adam_ "+ str(k) + ".pt"
+    model_filename = "model_adam_gareader.pt"
 
-        if model_name == "GAReader":
-            from baselines.GAReader import args, GAReader
-
-            main(
-                args.get_args(data_dir, cache_dir, embedding_folder, output_dir, log_dir,lr),
-                model_filename,
-            )
+    if model_name == "GAReader":
+        from baselines.GAReader import args, GAReader
+        main(
+            args.get_args(data_dir, cache_dir, embedding_folder, output_dir, log_dir),
+            model_filename,
+        )
