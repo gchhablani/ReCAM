@@ -259,7 +259,7 @@ if __name__ == "__main__":
         cache_dir = "./ga/cache_" + str(k)
         log_dir = "./ga/log_" + str(k)
 
-        model_filename = "model_adam_ "+ str(k) ".pt"
+        model_filename = "model_adam_ "+ str(k) + ".pt"
 
         if model_name == "GAReader":
             from baselines.GAReader import args, GAReader
