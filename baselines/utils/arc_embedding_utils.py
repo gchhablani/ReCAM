@@ -34,7 +34,7 @@ def load_data(
 
     train, dev = data.TabularDataset.splits(
         path=path,
-        train="Task_1_train.jsonl",
+        train="Task_1_train_trial.jsonl",
         validation="Task_1_dev.jsonl",
         test=None,
         format="json",

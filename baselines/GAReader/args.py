@@ -3,7 +3,7 @@
 import argparse
 
 
-def get_args(data_dir, cache_dir, embedding_folder, model_dir, log_dir):
+def get_args(data_dir, cache_dir, embedding_folder, model_dir, log_dir,lr):
 
     parser = argparse.ArgumentParser(description="ReCAM")
 
@@ -62,7 +62,7 @@ def get_args(data_dir, cache_dir, embedding_folder, model_dir, log_dir):
     parser.add_argument("--epoch_num", default=30, type=int)
     parser.add_argument("--dropout", default=0.5, type=float)
 
-    parser.add_argument("--lr", default=0.001, type=float, help="learning rate")
+    parser.add_argument("--lr", default=lr, type=float, help="learning rate")
 
     parser.add_argument("--clip", default=10, type=int, help="")
 

@@ -248,20 +248,23 @@ def main(config, model_filename):
 
 if __name__ == "__main__":
 
-    model_name = "GAReader"
-    data_dir = "./data/training_data"
-    embedding_folder = "./baselines/embeddings/"  ##
+    lrs = [1e-3, 1e-4, 1e-5, 1e-6]
 
-    output_dir = "./ga/output"
-    cache_dir = "./ga/cache"
-    log_dir = "./ga/log/"
+    for k, lr in enumerate(lrs):
+        model_name = "GAReader"
+        data_dir = "./data/imperceptibility/training_data"
+        embedding_folder = "./baselines/embeddings/"  ##
 
-    model_filename = "model_adam1.pt"
+        output_dir = "./ga/output_" + str(k)
+        cache_dir = "./ga/cache_" + str(k)
+        log_dir = "./ga/log_" + str(k)
 
-    if model_name == "GAReader":
-        from baselines.GAReader import args, GAReader
+        model_filename = "model_adam_ "+ str(k) ".pt"
 
-        main(
-            args.get_args(data_dir, cache_dir, embedding_folder, output_dir, log_dir),
-            model_filename,
-        )
+        if model_name == "GAReader":
+            from baselines.GAReader import args, GAReader
+
+            main(
+                args.get_args(data_dir, cache_dir, embedding_folder, output_dir, log_dir,lr),
+                model_filename,
+            )
