@@ -37,7 +37,7 @@ class ClozeDataset(Dataset):
         """
         self.config = config
         self.tokenizer = tokenizer
-
+        self.config.truncate_length = 512
         with open(self.config.file_path) as f:
             self.data = [json.loads(datapoint) for datapoint in f.read().splitlines()]
 
@@ -73,8 +73,32 @@ class ClozeDataset(Dataset):
             "input_ids"
         ]
 
-        if len(article_tokens) + len(question_tokens) + 9 > 512:
-            remaining_length = self.config.truncate_length - len(question_tokens) - 9
+        # Tokenizing Options
+        options = [data["option_" + str(i)] for i in range(5)]
+        options_tokenized = []
+        options_tokens = []
+        for i in range(5):
+            option = self.tokenizer(
+                options[i],
+                return_token_type_ids=False,
+                return_attention_mask=False,
+                add_special_tokens=False,
+                verbose=False,
+            )["input_ids"]
+            options_tokenized.append(option)
+            options_tokens += option
+
+        if (
+            len(article_tokens) + len(question_tokens) + len(options_tokens) + 1 + 3
+            > self.config.truncate_length
+        ):
+            remaining_length = (
+                self.config.truncate_length
+                - len(question_tokens)
+                - len(options_tokens)
+                - 1
+                - 3
+            )
 
             mask = [0 for i in range(len(article_tokens))]
 
@@ -115,25 +139,23 @@ class ClozeDataset(Dataset):
         # Saving the [MASK]'s index
         answer_index = truncated_tokens.index(self.mask_id)
 
-        # Tokenizing Options
-        options = [data["option_" + str(i)] for i in range(5)]
-        options_tokenized = []
-        options_tokens = []
-        for i in range(5):
-            option = self.tokenizer(
-                options[i],
-                return_token_type_ids=False,
-                return_attention_mask=False,
-                add_special_tokens=False,
-                verbose=False,
-            )["input_ids"]
-            options_tokenized.append(option)
-            options_tokens += option
-
         # Storing Answer
 
         answer = data["label"]
+        # if len(truncated_tokens + options_tokens + [self.tokenizer.sep_token_id,])>512:
+        #   print("="*80)
+        #   print(len(article_tokens))
+        #   print(len(question_tokens))
+        #   print(len(truncated_tokens))
+        #   print(len(options_tokens))
+        #   print(1)
+        #   print("="*80)
 
+        # print(len(truncated_tokens
+        #     + options_tokens
+        #     + [
+        #         self.tokenizer.sep_token_id,
+        #     ]))
         return {
             "article": truncated_tokens
             + options_tokens
@@ -198,6 +220,8 @@ class ClozeDataset(Dataset):
             answer_indices.append(sample[3])
             answers.append(sample[4])
 
+        # print(max_len)
+        # print(ops_max_len)
         # Applying padding to articles relative to the batch
         for i in range(len(articles)):
 
