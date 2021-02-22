@@ -32,6 +32,7 @@ from src.utils.logger import Logger
 import os
 
 from src.utils.integrated_gradients import MyIntegratedGradients
+from transformers import AutoTokenizer
 
 # from src.utils.misc import seed
 
@@ -79,7 +80,9 @@ preprocessor = configmapper.get_object(
 
 model, train_data, val_data = preprocessor.preprocess(model_config, data_config)
 
-tokenizer = AutoTokenizer.from_pretrained(model_config.params.pretrained_model_name_or_path)
+tokenizer = AutoTokenizer.from_pretrained(
+    model_config.params.pretrained_model_name_or_path
+)
 # model = configmapper.get_object("models", model_config.name).from_pretrained(
 #     'bert-large-uncased'
 # )
@@ -93,8 +96,7 @@ print("### Running IG ###")
     samples,
     word_importances,
     token_importances,
-) = big.get_all_importances(
-)
+) = big.get_all_importances()
 
 print("### Saving the Scores ###")
 # print(samples)
