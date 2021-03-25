@@ -1,0 +1,22 @@
+main: &main
+  name: cloze
+  data_dir: ./data/imperceptibility/
+  truncate: True
+  preprocessor:
+    name: clozePreprocessor
+    tokenizer:
+      name: AutoTokenizer
+      init_params:
+        pretrained_model_name_or_path: "albert-large-v2"
+
+train: &train
+  <<: *main
+  file_path: ./data/non-specificity/training_data/Task_2_train_trial.jsonl
+  split: train
+
+val:
+  <<: *main
+  file_path: ./data/non-specificity/training_data/Task_2_dev.jsonl
+  split: val
+test:
+  <<: *main
