@@ -182,8 +182,14 @@ class ClozeTrainer:
 
                         train_scores = dict(
                             zip(
-                                [train_loss_name,] + metric_name_list,
-                                [training_loss,] + metric_list,
+                                [
+                                    train_loss_name,
+                                ]
+                                + metric_name_list,
+                                [
+                                    training_loss,
+                                ]
+                                + metric_list,
                             )
                         )
 
@@ -278,7 +284,7 @@ class ClozeTrainer:
                 + str(epoch)
                 + ".pth",
             )
-            '''
+            """
             if epoch == max_epochs:
                 print("\nEvaluating\n")
                 val_scores = self.val(
@@ -439,7 +445,8 @@ class ClozeTrainer:
                     global_step,
                     append_text=self.train_config.append_text,
                 )
-            '''
+            """
+
     ## Need to check if we want same loggers of different loggers for train and eval
     ## Evaluate
 
@@ -455,7 +462,18 @@ class ClozeTrainer:
         append_text,
     ):
 
-        return_dic = dict(zip([loss_name,] + metric_name_list, [loss,] + metric_list,))
+        return_dic = dict(
+            zip(
+                [
+                    loss_name,
+                ]
+                + metric_name_list,
+                [
+                    loss,
+                ]
+                + metric_list,
+            )
+        )
 
         loss_name = f"{append_text}_{self.log_label}_{loss_name}"
         if log_values["loss"]:
@@ -544,14 +562,25 @@ class ClozeTrainer:
             val_loss_name = self.train_config.criterion.type
             all_outputs = torch.argmax(all_outputs, axis=1)
             metric_list = [
-                metric(all_outputs.detach().cpu(), all_labels.cpu(), **self.metrics[metric])
+                metric(
+                    all_outputs.detach().cpu(), all_labels.cpu(), **self.metrics[metric]
+                )
                 for metric in self.metrics
             ]
             metric_name_list = [
                 metric["type"] for metric in self._config.main_config.metrics
             ]
             return_dic = dict(
-                zip([val_loss_name,] + metric_name_list, [loss,] + metric_list,)
+                zip(
+                    [
+                        val_loss_name,
+                    ]
+                    + metric_name_list,
+                    [
+                        loss,
+                    ]
+                    + metric_list,
+                )
             )
             if log:
                 val_scores = self.log(

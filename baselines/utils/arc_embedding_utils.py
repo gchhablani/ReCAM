@@ -42,7 +42,10 @@ def load_data(
     )
 
     print(
-        "the size of train: {}, dev:{},".format(len(train.examples), len(dev.examples),)
+        "the size of train: {}, dev:{},".format(
+            len(train.examples),
+            len(dev.examples),
+        )
     )
 
     word_field.build_vocab(

@@ -12,83 +12,98 @@ from tqdm.auto import tqdm
 from numpy.linalg import norm
 
 
-nltk.download('punkt')
+nltk.download("punkt")
 
 import spacy
-nlp = spacy.load('en', disable=['parser', 'ner'])
 
-nltk.download('sentiwordnet')
+nlp = spacy.load("en", disable=["parser", "ner"])
+
+nltk.download("sentiwordnet")
 from nltk.corpus import sentiwordnet as swn
 
 
 from itertools import chain
-nltk.download('wordnet')
+
+nltk.download("wordnet")
 from nltk.corpus import wordnet as wn
 
+
 class StatisticalEmbedding:
-    def __init__(self,normalise=True):
+    def __init__(self, normalise=True):
         # add word frequency later
         # try to fix number of senses and add it later
         # try to fix number of hyponyms and add it later
         self.normalise = normalise
 
-    def get_embedding(self,word):
+    def get_embedding(self, word):
         len_embedding = self.get_length_of_word(word)
         depth_hypernymy_embedding = self.get_depth_of_hypernymy_tree(word)
         avg_depth_hypernymy_embedding = self.get_avg_depth_of_hypernymy_tree(word)
         pos_neg_obj_score = self.get_pos_neg_obj_scores(word)
         avg_pos_neg_obj_score = self.get_avg_pos_neg_obj_scores(word)
 
-        embedding = [len_embedding,depth_hypernymy_embedding,avg_depth_hypernymy_embedding,pos_neg_obj_score[0],pos_neg_obj_score[1],pos_neg_obj_score[2],avg_pos_neg_obj_score[0],avg_pos_neg_obj_score[1],avg_pos_neg_obj_score[2]]
-        if(self.normalise):
-            embedding = embedding/norm(embedding)
+        embedding = [
+            len_embedding,
+            depth_hypernymy_embedding,
+            avg_depth_hypernymy_embedding,
+            pos_neg_obj_score[0],
+            pos_neg_obj_score[1],
+            pos_neg_obj_score[2],
+            avg_pos_neg_obj_score[0],
+            avg_pos_neg_obj_score[1],
+            avg_pos_neg_obj_score[2],
+        ]
+        if self.normalise:
+            embedding = embedding / norm(embedding)
         return embedding
 
-    def get_length_of_word(self,word):
-        words = word.split(' ')
+    def get_length_of_word(self, word):
+        words = word.split(" ")
         lengths = [len(word) for word in words]
         max_len = max(lengths)
         return max_len
 
-    def get_depth_of_hypernymy_tree(self,word):
+    def get_depth_of_hypernymy_tree(self, word):
         max_len_paths = 0
-        words = word.split(' ')
+        words = word.split(" ")
         for word_n in words:
-            if(len(wn.synsets(word_n))>0):
+            if len(wn.synsets(word_n)) > 0:
                 j = wn.synsets(word_n)[0]
                 paths_to_top = j.hypernym_paths()
-                max_len_paths = max(max_len_paths,len(max(paths_to_top, key = lambda i: len(i))))
+                max_len_paths = max(
+                    max_len_paths, len(max(paths_to_top, key=lambda i: len(i)))
+                )
 
         return max_len_paths
 
-    def get_avg_depth_of_hypernymy_tree(self,word):
-        words = word.split(' ')
+    def get_avg_depth_of_hypernymy_tree(self, word):
+        words = word.split(" ")
         lst_avg_len_paths = []
         for word_n in words:
             i = 0
             avg_len_paths = 0
-            
+
             for j in wn.synsets(word_n):
                 paths_to_top = j.hypernym_paths()
-                max_len_path = len(max(paths_to_top, key = lambda k: len(k)))
+                max_len_path = len(max(paths_to_top, key=lambda k: len(k)))
                 avg_len_paths += max_len_path
                 i += 1
-            if(i>0):
-                return avg_len_paths/i
+            if i > 0:
+                return avg_len_paths / i
             else:
                 return 0
 
-    def get_pos_neg_obj_scores(self,word):
-        words = word.split(' ')
+    def get_pos_neg_obj_scores(self, word):
+        words = word.split(" ")
         pos_scores = []
         neg_scores = []
         obj_scores = []
-        
+
         for word_n in words:
 
-            if(len(list(swn.senti_synsets(word_n)))>0):
+            if len(list(swn.senti_synsets(word_n))) > 0:
                 j = list(swn.senti_synsets(word_n))[0]
-                
+
                 pos_scores.append(j.pos_score())
                 neg_scores.append(j.neg_score())
                 obj_scores.append(j.obj_score())
@@ -96,14 +111,14 @@ class StatisticalEmbedding:
                 pos_scores.append(0)
                 neg_scores.append(0)
                 obj_scores.append(0)
-        return (max(pos_scores),max(neg_scores),max(obj_scores))
+        return (max(pos_scores), max(neg_scores), max(obj_scores))
 
-    def get_avg_pos_neg_obj_scores(self,word):
-        words = word.split(' ')
+    def get_avg_pos_neg_obj_scores(self, word):
+        words = word.split(" ")
         pos_scores = []
         neg_scores = []
         obj_scores = []
-        
+
         for word_n in words:
             ct = 0
             avg_pos_score = 0
@@ -116,15 +131,15 @@ class StatisticalEmbedding:
                 avg_obj_score += j.obj_score()
                 ct += 1
 
-            if(ct>0):
-                pos_scores.append(avg_pos_score/ct)
-                neg_scores.append(avg_neg_score/ct)
-                obj_scores.append(avg_obj_score/ct)
+            if ct > 0:
+                pos_scores.append(avg_pos_score / ct)
+                neg_scores.append(avg_neg_score / ct)
+                obj_scores.append(avg_obj_score / ct)
             else:
                 pos_scores.append(0)
                 neg_scores.append(0)
                 obj_scores.append(0)
-        return (max(pos_scores),max(neg_scores),max(obj_scores))
+        return (max(pos_scores), max(neg_scores), max(obj_scores))
 
 
 def gelu(x):
@@ -224,8 +239,8 @@ class BertForCloze(BertPreTrainedModel):
         self.vocab_size = self.bert.embeddings.word_embeddings.weight.size(0)
         self.tokenizer = AutoTokenizer.from_pretrained(config._name_or_path)
         self.emb = StatisticalEmbedding()
-        self.fc1 = nn.Linear(45,5)
-        self.fc2 = nn.Linear(10,5)
+        self.fc1 = nn.Linear(45, 5)
+        self.fc2 = nn.Linear(10, 5)
 
     def init_weights(self, module):
 
@@ -250,7 +265,7 @@ class BertForCloze(BertPreTrainedModel):
         """
         articles, articles_mask, ops, question_pos = x_input
         option_tokens = ops.clone()
-        
+
         ### BERT CLOZE
 
         bsz = ops.size(0)
@@ -279,17 +294,23 @@ class BertForCloze(BertPreTrainedModel):
         for batch_of_options in range(bsz):
             batch_op = []
             for option_idx in range(option_tokens.shape[1]):
-                opt_str = self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(option_tokens[batch_of_options][option_idx].detach().tolist()))
+                opt_str = self.tokenizer.convert_tokens_to_string(
+                    self.tokenizer.convert_ids_to_tokens(
+                        option_tokens[batch_of_options][option_idx].detach().tolist()
+                    )
+                )
                 emb = self.emb.get_embedding(opt_str)
                 batch_op.append(torch.tensor(emb))
 
-            option_strings.append(torch.cat(batch_op,dim=0))
+            option_strings.append(torch.cat(batch_op, dim=0))
 
-        option_strings = torch.as_tensor(torch.stack(option_strings),dtype=torch.float32,device=out.device)
+        option_strings = torch.as_tensor(
+            torch.stack(option_strings), dtype=torch.float32, device=out.device
+        )
         linguistic_output = self.fc1(option_strings)
-        
+
         ### COMMON NETWORK
-        bert_cat_linguistic = torch.cat((out,linguistic_output), dim=1)
+        bert_cat_linguistic = torch.cat((out, linguistic_output), dim=1)
         final_output = self.fc2(bert_cat_linguistic)
 
         return final_output
