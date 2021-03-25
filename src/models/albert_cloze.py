@@ -4,11 +4,7 @@ import math
 import torch.nn as nn
 from src.utils.mapper import configmapper
 from transformers import AlbertModel, AlbertConfig
-from transformers.models.albert.modeling_albert import (
-    AlbertMLMHead,
-    AlbertPreTrainedModel,
-)
-
+from transformers.models.albert.modeling_albert import AlbertMLMHead, AlbertPreTrainedModel
 
 @configmapper.map("models", "albert_cloze")
 class AlbertForCloze(AlbertPreTrainedModel):
@@ -27,10 +23,12 @@ class AlbertForCloze(AlbertPreTrainedModel):
 
         self.init_weights()
 
+
+
         self.config = config
         self.dropout_layer = nn.Dropout(0.3)
         self.vocab_size = self.albert.embeddings.word_embeddings.weight.size(0)
-        # print("MODEL EXPECT SIZE",self.vocab_size)
+
 
     def forward(self, x_input):
         """
@@ -44,7 +42,7 @@ class AlbertForCloze(AlbertPreTrainedModel):
         """
         pad_token_id = self.config.pad_token_id
         articles, articles_mask, ops, question_pos = x_input
-        # print(ops.device)
+
         bsz = ops.size(0)
         ops = ops.reshape(bsz, 1, 5, -1)
 
@@ -58,13 +56,14 @@ class AlbertForCloze(AlbertPreTrainedModel):
         out = torch.gather(out, 1, question_pos)
         out = self.dropout_layer(out)
 
+
         out = self.cls(out)
-        # print(out.shape)
+
         # convert ops to one hot
         out = out.view(bsz, opnum, 1, self.vocab_size)
         out[:, :, :, pad_token_id] = 0
         out = out.expand(bsz, opnum, 5, self.vocab_size)
-        # print(out.shape)
+
         out_tokens = torch.zeros((bsz, opnum, 5, 1), device=ops.device)
         pad_tokens = ops.shape[3] - torch.sum((ops == pad_token_id), dim=3).unsqueeze(3)
 
@@ -75,5 +74,5 @@ class AlbertForCloze(AlbertPreTrainedModel):
         out_tokens = torch.div(out_tokens, pad_tokens)
         out = out_tokens
         out = out.view(-1, 5)
-        # print(out.shape)
+
         return out
