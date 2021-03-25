@@ -4,11 +4,7 @@ import math
 import torch.nn as nn
 from src.utils.mapper import configmapper
 from transformers import RobertaModel, RobertaConfig
-from transformers.models.roberta.modeling_roberta import (
-    RobertaPreTrainedModel,
-    RobertaLMHead,
-)
-
+from transformers.models.roberta.modeling_roberta import RobertaPreTrainedModel,RobertaLMHead
 
 @configmapper.map("models", "roberta_cloze")
 class RobertaForCloze(RobertaPreTrainedModel):
@@ -24,10 +20,13 @@ class RobertaForCloze(RobertaPreTrainedModel):
 
         self.roberta = RobertaModel(config, add_pooling_layer=False)
         self.cls = RobertaLMHead(config)
-        self.dropout_layer = nn.Dropout(0.3)
 
         self.init_weights()
+
+
+        self.dropout_layer = nn.Dropout(0.3)
         self.config = config
+
         self.vocab_size = self.roberta.embeddings.word_embeddings.weight.size(0)
 
     def forward(self, x_input):
@@ -60,7 +59,7 @@ class RobertaForCloze(RobertaPreTrainedModel):
         out = out.view(bsz, opnum, 1, self.vocab_size)
         out[:, :, :, pad_token_id] = 0
         out = out.expand(bsz, opnum, 5, self.vocab_size)
-        # print(out.shape)
+
         out_tokens = torch.zeros((bsz, opnum, 5, 1), device=ops.device)
         pad_tokens = ops.shape[3] - torch.sum((ops == pad_token_id), dim=3).unsqueeze(3)
 
@@ -71,4 +70,5 @@ class RobertaForCloze(RobertaPreTrainedModel):
         out_tokens = torch.div(out_tokens, pad_tokens)
         out = out_tokens
         out = out.view(-1, 5)
+
         return out
