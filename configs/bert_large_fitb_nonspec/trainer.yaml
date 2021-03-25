@@ -1,22 +1,38 @@
-trainer_name: forty
+trainer_name: cloze
 version: 1.0
 main_config: &main
     seed: !!int 42
     metrics:
-        - sklearn_mse
+
+      - type: sklearn_f1
+        params:
+          average: macro
+
+      - type: sklearn_p
+        params:
+          average: macro
+
+      - type: sklearn_r
+        params:
+          average: macro
+
+      - type: sklearn_acc
+        params: 
+            normalize: True
+
     device:
-        name: 'cpu'
+        name: 'cuda'
 
 train: &train
     # Change to different value if not using max_steps
     <<: *main
     # Can add the max_epochs vs max_steps functionality
     append_text: train
-    max_epochs: !!int 2
+    max_epochs: !!int 4
     loader_params:
-        batch_size: !!int 32
+        batch_size: !!int 2
         num_workers: !!int 4
-        shuffle: true
+        shuffle: True
 
     optimizer:
         type: adam_w
@@ -28,35 +44,33 @@ train: &train
     scheduler: null
 
     criterion:
-        type: mse
+        type: CrossEntropyLoss
         params: null
 
     save_on : ##Best Model/Final Model Saving
-      score: mse
+      score: sklearn_acc
       desired: min
-      best_path: './ckpts/forty/train/best_{}.pth'
-      final_path: './ckpts/forty/train/final_{}.pth'
-
-    save_after_epoch: false
+      best_path: './ckpts/cloze/train/best_{}.pth'
+      final_path: './ckpts/cloze/train/final_{}.pth'
 
 
     checkpoint:
-        checkpoint_dir: './ckpts/forty/'
+        checkpoint_dir: './ckpts/cloze/'
 
-    log_and_val_interval: !!int 100 # Set to null if using different val and log intervals, Overrides log_interval nd val_interval
+    log_and_val_interval: !!int 500 ## Set to null if using different val and log intervals, Overrides log_interval nd val_interval
 
-    val_interval: !!int 100 # Global steps
+    val_interval: !!int 500 # Global steps
     log:
         log_interval: !!int 100 # Global Steps
         logger_params:
-            model: two_layer_nn
-            trainer: forty
+            model: cloze
+            trainer: cloze
             comment: "Trial for Logger and Trainer"
-            log_dir: './logs/forty/train'
+            log_dir: './logs/cloze/train'
         log_label: 1
         values:
-            loss: true
-            metrics: true
+            loss: True
+            metrics: True
             hparams: null
 
 val:
@@ -64,15 +78,15 @@ val:
     append_text: val
     max_steps: null
     loader_params:
-        batch_size: !!int 32
+        batch_size: !!int 4
         num_workers: !!int 4
         shuffle: false
     # log:
     #     logger_params:
     #         model: two_layer_nn
-    #         trainer: forty
+    #         trainer: cloze
     #         comment: "Trial for Logger and Trainer"
-    #         log_dir: './logs/forty/eval'
+    #         log_dir: './logs/cloze/eval'
     #     log_label: 1
     #     values:
     #         loss: true
@@ -82,24 +96,24 @@ grid_search:
   directory: null
   hyperparams:
     train:
-      max_epochs: !!int 2
+      max_epochs: !!int 10
       loader_params:
         batch_size:
-          - !!int 32
-          # - !!int 64
-          # - !!int 128
+          - !!int 4
       optimizer:
         type:
           - adam_w
-        #   - adam
-        # params:
-        #   lr:
-        #     - !!float 1e-4
-        #     - !!float 1e-5
-            # - !!float 1e-6
-          # weight_decay:
-          #   - 0
-          #   - 0.01
+          # - adam
+        params:
+          lr:
+            - !!float 1e-4
+            - !!float 1e-5
+            - !!float 1e-6
+          weight_decay:
+            - 0
+            - 0.001
+            - 0.0001
+            - 0.00001
         # - type: adam_w
         #   params:
         #     lr: !!float 1e-5
@@ -132,29 +146,8 @@ grid_search:
           #   params:
           #     step_size: !!int 100
           #     gamma: 0.1
-
+          #
           # - type: cosineanneal
-          #   params:
-          #     T_max: !!int 100
-          #     eta_min: !!float 1e-9
-
-          # - type: reduceplateau
-          #   params:
-          #     mode: min
-          #     factor: !!float 0.1
-          #     patience: !!float 3
-          #
-          # - type: cyclic
-          #   params:
-          #     base_lr: !!float 1e-7
-          #     max_lr: !!float 1e-3
-          #     step_size_up: !!int 100
-          #     step_size_down: !!int 200
-          #     mode: exp_range
-          #     cycle_momentum: false
-          #
-          #
-          # - type: cosineannealrestart
           #   params:
           #     T_0: !!int 100
           #     T_mult: !!int 2
@@ -162,11 +155,34 @@ grid_search:
 
 
 
+          - type: reduceplateau
+            params:
+              mode: min
+              factor: !!float 0.1
+              patience: !!float 3
+
+          - type: cyclic
+            params:
+              base_lr: !!float 1e-7
+              max_lr: !!float 1e-3
+              step_size_up: !!int 100
+              step_size_down: !!int 200
+              mode: exp_range
+
+
+          - type: cosineannealrestart
+            params:
+              T_0: !!int 100
+              T_mult: !!int 2
+              eta_min: !!float 1e-9
+
+
+
       log:
         logger_params:
-          model: two_layer_nn
-          trainer: forty
-          comment: "GridSearch for Forty"
+          model: cloze
+          trainer: cloze
+          comment: "GridSearch for cloze"
           log_dir: './logs/gridsearch'
         log_label: null
         values:
