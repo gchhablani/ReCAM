@@ -11,3 +11,5 @@ build
 src.egg-info/SOURCES.txt
 src.egg-info/top_level.txt
 .vscode
+*.pyc
+src/datasets/__pycache__/__init__.cpython-38.pyc

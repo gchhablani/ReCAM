@@ -40,7 +40,7 @@ def convert_params_to_dict(params):
                 f"Undefined {v} for the given key: {k} in mapper        ,storing original value"
             )
             dic[k] = v
-        return value
+    return dic
 
 
 class Config:
