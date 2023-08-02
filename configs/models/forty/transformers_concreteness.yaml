@@ -1,4 +1,0 @@
-name: bert_concreteness
-params:
-  model_name: bert-base-uncased
-  freeze_layers: 10

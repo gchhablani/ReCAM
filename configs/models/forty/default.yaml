@@ -1,6 +1,0 @@
-name: two_layer_nn
-params: ## Dataset Preprocessor decides the embedding to be used
-  dims:
-    - 1200
-    - 128
-    - 1

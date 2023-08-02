@@ -24,8 +24,6 @@ class DistilBertForCloze(DistilBertPreTrainedModel):
         super(DistilBertForCloze, self).__init__(config)
 
         self.distilbert = DistilBertModel(config)
-        self.dropout_layer = nn.Dropout(0.3)
-
         self.vocab_transform = nn.Linear(config.dim, config.dim)
         self.vocab_layer_norm = nn.LayerNorm(config.dim, eps=1e-12)
         self.vocab_projector = nn.Linear(config.dim, config.vocab_size)
@@ -33,8 +31,11 @@ class DistilBertForCloze(DistilBertPreTrainedModel):
         self.init_weights()
 
         self.config = config
+        self.dropout_layer = nn.Dropout(0.3)
+
+
         self.vocab_size = self.distilbert.embeddings.word_embeddings.weight.size(0)
-        # print("MODEL EXPECT SIZE",self.vocab_size)
+
 
     def forward(self, x_input):
         """
@@ -57,25 +58,26 @@ class DistilBertForCloze(DistilBertPreTrainedModel):
             articles, attention_mask=articles_mask, output_hidden_states=False
         ).last_hidden_state
 
+
         question_pos = question_pos.reshape(-1, 1, 1)
         question_pos = question_pos.expand(bsz, opnum, out.size(-1))
         out = torch.gather(out, 1, question_pos)
 
         # Dropout
         out = self.dropout_layer(out)
+        
 
+        # out = self.cls(out)
         prediction_logits = self.vocab_transform(out)  # (bs, seq_length, dim)
         prediction_logits = gelu(prediction_logits)  # (bs, seq_length, dim)
-        prediction_logits = self.vocab_layer_norm(
-            prediction_logits
-        )  # (bs, seq_length, dim)
+        prediction_logits = self.vocab_layer_norm(prediction_logits)  # (bs, seq_length, dim)
         out = self.vocab_projector(prediction_logits)  # (bs, seq_length, vocab_size)
 
         # convert ops to one hot
         out = out.view(bsz, opnum, 1, self.vocab_size)
         out[:, :, :, pad_token_id] = 0
         out = out.expand(bsz, opnum, 5, self.vocab_size)
-        # print(out.shape)
+
         out_tokens = torch.zeros((bsz, opnum, 5, 1), device=ops.device)
         pad_tokens = ops.shape[3] - torch.sum((ops == pad_token_id), dim=3).unsqueeze(3)
 
@@ -86,4 +88,5 @@ class DistilBertForCloze(DistilBertPreTrainedModel):
         out_tokens = torch.div(out_tokens, pad_tokens)
         out = out_tokens
         out = out.view(-1, 5)
+
         return out
