@@ -249,7 +249,6 @@ def main(config, model_filename):
 
 if __name__ == "__main__":
 
-
     model_name = "GAReader"
     data_dir = "./data/imperceptibility/training_data"
     embedding_folder = "./baselines/embeddings/"  ##
@@ -262,6 +261,7 @@ if __name__ == "__main__":
 
     if model_name == "GAReader":
         from baselines.GAReader import args, GAReader
+
         main(
             args.get_args(data_dir, cache_dir, embedding_folder, output_dir, log_dir),
             model_filename,
